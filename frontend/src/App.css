@@ -1,0 +1,41 @@
+.header{
+  display: flex;
+  color: rgb(13, 110, 253);
+  align-items: center;
+  justify-content: center;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.download{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 100px;
+  margin-bottom: 10px;
+}
+
+.upload{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 100px;
+}
+
+.text{
+  display: flex;
+  color: dimgray;
+  justify-content: center;
+  align-items: center;
+  /* margin-left: 280px;
+  margin-right: 280px; */
+  margin-left: 20%;
+  margin-right: 20%;
+  margin-top: 20px;
+}
+
+.hiddenButton{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
