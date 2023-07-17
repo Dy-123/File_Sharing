@@ -174,7 +174,7 @@ app.get("/publicFiles", async (req,res) => {
   var publicFiles=[];
   for(var i=0;i<files.length;++i){
     console.log(files[i]);
-    if(Date.parse(files[i].expTime)<=Date.now()){
+    if(Date.parse(files[i].metadata.expiryTime)<=Date.now()){
 
       // can try locking mechanism also, for try and catch can utlise promise .then() .catch()
       try{
