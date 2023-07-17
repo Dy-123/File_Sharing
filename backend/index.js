@@ -86,21 +86,13 @@ const storage = new GridFsStorage({
 
         const filename = file.originalname;
         const shortname = await hashName();
-        // console.log("Short name returned is: "+shortname);
 
         console.log(req.body);
 
-        // Setup body-parser for accessing form data in req.body using . notation
         const expTime = new Date(req.body.expiryTime);
         const noOfDown = parseInt(req.body.noOfDownload);
         const isPublic = req.body.isPublic==='true';
-
-        // console.log(req.body.isPublic==='true', req.body.isPublic);
-
-        // backend validation (ignore for now)
-        // if(!isNaN(expTime) || !isNaN(noOfDown)){
-        //   reject("Invalid input");
-        // }
+        const passwordValue = req.body.password;
 
         const fileInfo = {
           filename: filename,
@@ -108,7 +100,8 @@ const storage = new GridFsStorage({
             shortname: shortname,
             expiryTime: expTime,
             noOfDownload: noOfDown,
-            isPublic: isPublic
+            isPublic: isPublic,
+            password: passwordValue
           },
           bucketName: "newBucket"
         };
@@ -121,33 +114,20 @@ const storage = new GridFsStorage({
     storage
   });
 
-// app.get('/',(req,res)=>{
-//     res.send('<html><body><h1>Hello</h1></body></html>');
-// });
-
 app.post('/upload',upload.single("fileUpload"),async (req,res)=>{
 
     const file = req.file;
-    // console.log(file);
-    // console.log(file.metadata.shortname);
-    // const count = await bucket.find({}).toArray();
-    // console.log(count.length);
-
-    // backend validation (ignore for now)
-    // if(file===undefined){
-    //   return res.status(404).send("Error");
-    // }
-
-    // console.log(req.headers['content-type']);
     
     console.log("File has been uploaded. File id: "+file.metadata.shortname);
     res.send(file.metadata.shortname)
 
 });
 
-app.get('/download', async (req, res) => {
-  
-    const cursor = bucket.find({ 'metadata.shortname' : req.query.filename });
+// using multer to parse the form data
+const upDown = multer();
+app.post('/download',upDown.none(), async (req, res) => {
+
+    const cursor = bucket.find({ 'metadata.shortname' : req.body.filename });
     const files = await cursor.toArray();
 
     console.log("File info of requested file: ");
@@ -158,22 +138,26 @@ app.get('/download', async (req, res) => {
       res.status(404).send("File not found");
     } else {
 
+      if(files[0].metadata.password!='' && files[0].metadata.password!=req.body.password){
+        res.status(401).send("File is password protected.");
+      }else{
+
       // can utilise promise .then() .catch() instead of try and catch
-      try{
-        const filename = files[0].filename;
-        // console.log(filename);
-        const downloadStream = bucket.openDownloadStreamByName(filename);
-        res.set('Content-Disposition', `attachment; filename="${filename}"`);
-        res.set({'Access-Control-Expose-Headers': 'Content-Disposition'});     // https://stackoverflow.com/a/71195901
-        await downloadStream.pipe(res);
-        if(files[0].metadata.noOfDownload<=1){
-          bucket.delete(files[0]._id);
-        }else{
-          // https://jira.mongodb.org/browse/CSHARP-2056
-          db.collection('newBucket.files').updateOne({_id:files[0]._id},{$set: {"metadata.noOfDownload": files[0].metadata.noOfDownload-1 }});
+        try{
+          const filename = files[0].filename;
+          const downloadStream = bucket.openDownloadStreamByName(filename);
+          res.set('Content-Disposition', `attachment; filename="${filename}"`);
+          res.set({'Access-Control-Expose-Headers': 'Content-Disposition'});     // https://stackoverflow.com/a/71195901
+          await downloadStream.pipe(res);
+          if(files[0].metadata.noOfDownload<=1){
+            bucket.delete(files[0]._id);
+          }else{
+            // https://jira.mongodb.org/browse/CSHARP-2056
+            db.collection('newBucket.files').updateOne({_id:files[0]._id},{$set: {"metadata.noOfDownload": files[0].metadata.noOfDownload-1 }});
+          }
+        }catch(err){
+          res.send("Someone removed the file");
         }
-      }catch(err){
-        res.send("Someone removed the file");
       }
 
     }
@@ -192,7 +176,7 @@ app.get("/publicFiles", async (req,res) => {
     console.log(files[i]);
     if(Date.parse(files[i].expTime)<=Date.now()){
 
-      // can try locking mechanism also also for try and catch can utlise promise .then() .catch()
+      // can try locking mechanism also, for try and catch can utlise promise .then() .catch()
       try{
         await bucket.delete(files[i]._id);
       }catch{

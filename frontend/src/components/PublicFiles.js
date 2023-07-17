@@ -26,21 +26,13 @@ function PublicFiles(){
   useEffect(() => {
       const fetchData = async () => {
         try {
-          const response = await fetch("http://localhost:5000/publicFiles");
+          const response = await fetch(process.env.REACT_APP_PUBLIC_FILES);
           const publicFiles = await response.json();
           publicFiles.reverse();
           
           console.log(publicFiles);
+
           var tableContent = [];
-          // tableContent.push(
-          //   <tr key="header">
-          //     <td>File id</td>
-          //     <td>File Name</td>
-          //     <td>Size</td>
-          //     <td>Expiry Time</td>
-          //     <td>Download Left</td>
-          //   </tr>
-          // );
           for(var i=0;i<publicFiles.length;++i){
             tableContent.push(
               <tr key={publicFiles[i].metadata.shortname}>

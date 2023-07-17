@@ -12,11 +12,9 @@ function App() {
 
       <Router>
           <nav className="navBarLinks navbar-light bg-light ">
-            {/* <div className="navBarLinks"> */}
             <Link to="/">Download</Link>
             <Link to="/upload" style={{"marginRight":"23px", "marginLeft":"23px"}}>Upload</Link>
             <Link to="/publicfiles">Public Files</Link>
-            {/* </div> */}
           </nav>
 
           <Routes>

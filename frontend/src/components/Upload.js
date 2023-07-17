@@ -8,8 +8,10 @@ function Upload(){
     const [isButtonVisible, setButtonVisible] = useState(false);
     const [copyText,setCopyText] = useState("");
     const [privacy, setPrivacy] = useState(false);
-    const [downloadCount,setDownloadCount] = useState("");
-    const [expDate,setExpDate] = useState("");
+    const [downloadCount,setDownloadCount] = useState(1);
+    const [expDate, setExpDate] = useState("");
+    const [passwordProtection,setPasswordProtection] = useState(false);
+    const [passwordValue,setPasswordValue] = useState("");
 
     const fileSelectEvent = (event) => {
         setFile(event.target.files[0]);
@@ -24,10 +26,13 @@ function Upload(){
         setText("Select a file");
         setDisabled(false);
       } else if(downloadCount==="" || downloadCount<1){
-        setText("Enter a valid number");
+        setText("Enter a valid Download Count number");
         setDisabled(false);
       } else if(expDate==="" || Date.parse(expDate)<=Date.now()){
-        setText("Enter a valid expiry time");
+        setText("Enter a valid file expiry time");
+        setDisabled(false);
+      }else if(passwordProtection===true && passwordValue===""){
+        setText("Password protection is selected enter a password");
         setDisabled(false);
       }else {
 
@@ -37,6 +42,7 @@ function Upload(){
         formData.append("expiryTime",expDate);
         formData.append("noOfDownload",downloadCount);
         formData.append("isPublic",privacy);
+        formData.append("password",passwordValue);
         formData.append("fileUpload", file);
 
         setText("File is being uploaded...");
@@ -71,14 +77,14 @@ function Upload(){
           }
         };
 
-        xhr.open('POST',"http://localhost:5000/upload");
+        xhr.open('POST',process.env.REACT_APP_UPLOAD);
         xhr.send(formData);
 
       }
 
     };
 
-    const toggleButton = () => {
+    const privacyToggleButton = () => {
       setPrivacy(prevState => !prevState);
     };
 
@@ -88,6 +94,14 @@ function Upload(){
 
     const expiryDateEvent = (event) => {
       setExpDate(event.target.value);
+    }
+
+    const passwordToggleButton = () => {
+      setPasswordProtection(!passwordProtection);
+    }
+
+    const passwordInputEvent = (event) => {
+      setPasswordValue(event.target.value);
     }
 
     return (
@@ -103,12 +117,12 @@ function Upload(){
               <label style={{"marginRight":"5px"}}>Private</label>
               <div
                 className={`toggle ${privacy ? 'on' : 'off'}`}
-                onClick={toggleButton}>
+                onClick={privacyToggleButton}>
               </div>
               <label style={{"marginRight":"25px","marginLeft":"5px" }}>Public</label>
 
               <label>Download Count</label>
-              <input type='number' className="inputWidthA" onChange={countDownloadEvent}></input>
+              <input type='number' className="inputWidthA" onChange={countDownloadEvent} value={downloadCount}></input>
 
             </div>
 
@@ -116,6 +130,17 @@ function Upload(){
               <label>File Expiry</label>
               <input type='datetime-local' className="inputWidthB" onChange={expiryDateEvent}></input>
             </div>
+
+            { privacy===false ?
+            (<div className="uploadOptions">
+              <label style={{"marginRight":"3px"}} >Password Protection</label>
+              <div
+                className={`toggle ${passwordProtection ? 'on' : 'off'}`}
+                onClick={passwordToggleButton}>
+              </div>
+              {passwordProtection===true ? <input type="password" style={{"marginLeft":"3px"}} className="inputWidthC" onChange={passwordInputEvent} value={passwordValue}></input> : <></>}
+            </div>) : <></>
+            }
 
 
             <div>

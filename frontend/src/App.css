@@ -52,7 +52,7 @@
 }
 
 .inputWidthB{
-  width: 185px;
+  width: 187px;
   margin-left: 112px;
 }
 
@@ -117,4 +117,20 @@
   /* margin-left: 20%;
   margin-right: 20%;
   margin-top: 20px; */
+}
+
+.inputWidthC{
+  width: 180px;
+  margin-left: 112px;
+}
+
+.downloadOptions{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inputWidthD{
+  width: 166px;
+  margin-left: 112px;
 }
