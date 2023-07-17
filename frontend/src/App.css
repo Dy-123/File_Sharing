@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   margin-top: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .download{
@@ -38,4 +38,83 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.uploadOptions{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inputWidthA{
+  width: 75px;
+  margin-left: 10px;
+}
+
+.inputWidthB{
+  width: 185px;
+  margin-left: 112px;
+}
+
+/* Toggle button */
+
+.toggle {
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  background-color: gray;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+}
+
+.toggle:before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.toggle.on {
+  background-color: rgb(13, 110, 253);
+}
+
+.toggle.on:before {
+  transform: translateX(20px);
+}
+
+.toggle.off:before {
+  transform: translateX(0);
+}
+
+/* Toggle button */
+
+.publicFiles{
+  display: flex;
+  color: dimgray;
+  justify-content: center;
+  align-items: center;
+  /* margin-left: 280px;
+  margin-right: 280px; */
+  margin-left: 20%;
+  margin-right: 20%;
+  margin-top: 20px;
+}
+
+.navBarLinks{
+  display: flex;
+  color: dimgray;
+  justify-content: center;
+  align-items: center;
+  height: 35px;
+  /* margin-left: 280px;
+  margin-right: 280px; */
+  /* margin-left: 20%;
+  margin-right: 20%;
+  margin-top: 20px; */
 }

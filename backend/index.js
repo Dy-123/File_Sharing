@@ -1,17 +1,15 @@
 const express = require('express');
-const multer = require('multer');
-const assert = require('assert');
-const fs = require('fs');
-const mongodb = require('mongodb');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const multer = require('multer');
 const {GridFsStorage} = require('multer-gridfs-storage');
-const { resolve } = require('path');
+const bodyParser = require('body-parser');
 
 require("dotenv").config();
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));    // Parse URL-encoded bodies (form data)
 
 const server = app.listen(5000, function(){
     console.log('node server is running ...');
@@ -75,7 +73,7 @@ const hashName = async () => {
       options
     )
     
-    console.log("Number of file serverd is: " + doc.count);
+    // console.log("Number of file serverd is: " + doc.count);
     return generateShortName(doc.count);
 
 }
@@ -85,13 +83,32 @@ const storage = new GridFsStorage({
     url: process.env.MONGO_CONN_URL,
     file: (req, file) => {
       return new Promise( async (resolve, reject) => {
+
         const filename = file.originalname;
         const shortname = await hashName();
-        console.log("Short name returned is: "+shortname);
+        // console.log("Short name returned is: "+shortname);
+
+        console.log(req.body);
+
+        // Setup body-parser for accessing form data in req.body using . notation
+        const expTime = new Date(req.body.expiryTime);
+        const noOfDown = parseInt(req.body.noOfDownload);
+        const isPublic = req.body.isPublic==='true';
+
+        // console.log(req.body.isPublic==='true', req.body.isPublic);
+
+        // backend validation (ignore for now)
+        // if(!isNaN(expTime) || !isNaN(noOfDown)){
+        //   reject("Invalid input");
+        // }
+
         const fileInfo = {
           filename: filename,
           metadata:{
-            shortname: shortname
+            shortname: shortname,
+            expiryTime: expTime,
+            noOfDownload: noOfDown,
+            isPublic: isPublic
           },
           bucketName: "newBucket"
         };
@@ -103,19 +120,6 @@ const storage = new GridFsStorage({
   const upload = multer({
     storage
   });
-  
-
-// mongoose.connect(process.env.MONGO_CONN_URL).then(()=>{
-//     console.log("mongodb connected")
-// }).catch((err)=>{
-//     console.log('Connection failed');
-//     console.log(err);
-// });
-
-
-
-
-// const upload = multer({dest: './uploads/'});
 
 // app.get('/',(req,res)=>{
 //     res.send('<html><body><h1>Hello</h1></body></html>');
@@ -128,8 +132,15 @@ app.post('/upload',upload.single("fileUpload"),async (req,res)=>{
     // console.log(file.metadata.shortname);
     // const count = await bucket.find({}).toArray();
     // console.log(count.length);
+
+    // backend validation (ignore for now)
+    // if(file===undefined){
+    //   return res.status(404).send("Error");
+    // }
+
+    // console.log(req.headers['content-type']);
     
-    console.log("File has been uploaded. File name is: "+file.metadata.shortname);
+    console.log("File has been uploaded. File id: "+file.metadata.shortname);
     res.send(file.metadata.shortname)
 
 });
@@ -143,53 +154,57 @@ app.get('/download', async (req, res) => {
     console.log(files);
 
     if (files.length === 0) {
-        console.log('No files found');
-        res.status(404).send("File not found");
+      console.log('No files found');
+      res.status(404).send("File not found");
     } else {
+
+      // can utilise promise .then() .catch() instead of try and catch
+      try{
         const filename = files[0].filename;
         // console.log(filename);
         const downloadStream = bucket.openDownloadStreamByName(filename);
         res.set('Content-Disposition', `attachment; filename="${filename}"`);
         res.set({'Access-Control-Expose-Headers': 'Content-Disposition'});     // https://stackoverflow.com/a/71195901
-        downloadStream.pipe(res);
+        await downloadStream.pipe(res);
+        if(files[0].metadata.noOfDownload<=1){
+          bucket.delete(files[0]._id);
+        }else{
+          // https://jira.mongodb.org/browse/CSHARP-2056
+          db.collection('newBucket.files').updateOne({_id:files[0]._id},{$set: {"metadata.noOfDownload": files[0].metadata.noOfDownload-1 }});
+        }
+      }catch(err){
+        res.send("Someone removed the file");
+      }
+
     }
 
  });
 
+app.get("/publicFiles", async (req,res) => {
 
-// app.get('/download',(req,res)=>{
-//     // res.send("Download requet recieved");
-//     // const file = bucket.find({
-//     //   filename: req.query.filename
-//     // })
-//     // .toArray((err, files) => {
-//     //   if (!files || files.length === 0) {
-//     //     return res.status(404)
-//     //       .json({
-//     //         err: "no files exist"
-//     //       });
-//     //     }else{
-//     //         bucket.openDownloadStreamByName(req.query.filename)
-//     //         .pipe(res);
-//     //     }
-//     // });
+  const cursor = bucket.find({});
+  const files = await cursor.toArray();
 
-//     // console.log("\n Here is the file info \n ---------------------- \n");
-//     // console.log(file);
+  console.log("Delete request recieved");
 
+  var publicFiles=[];
+  for(var i=0;i<files.length;++i){
+    console.log(files[i]);
+    if(Date.parse(files[i].expTime)<=Date.now()){
 
-//     // console.log(req.query.filename)
-//     // const file = bucket
-//     // .find({
-//     //   filename: req.query.filename
-//     // })
-//     // .toArray((err, files) => {
-//     //     console.log(files);
-//     //   if (!files || files.length === 0) {
-//     //     return res.send("file not found")
-//     //   }
-//     //   bucket.openDownloadStreamByName(req.query.filename)
-//     //     .pipe(res);
-//     // })
-// });
+      // can try locking mechanism also also for try and catch can utlise promise .then() .catch()
+      try{
+        await bucket.delete(files[i]._id);
+      }catch{
+        
+      }
+      
+    }else if(files[i].metadata.isPublic){
+      delete(files[i]._id);
+      publicFiles.push(files[i]);
+    }
+  } 
+  console.log("Number of public file send is: "+publicFiles.length);
+  res.status(200).send(publicFiles);
 
+})
