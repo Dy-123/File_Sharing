@@ -5,13 +5,11 @@ import Download from './components/Download';
 import Upload from './components/Upload';
 import PublicFiles from './components/PublicFiles';
 import MyFiles from './components/MyFiles';
-import Login from "./components/Login";
 
 function App() {
   return (
     <>
-      <Login/>
-      {/* <Header/>
+      <Header/>
 
       <Router>
           <nav className="navBarLinks navbar-light bg-light ">
@@ -28,7 +26,7 @@ function App() {
             <Route path="/myfiles" element={<MyFiles />} />
           </Routes>
         
-      </Router> */}
+      </Router>
     </>
   );
 }
