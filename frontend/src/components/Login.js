@@ -42,7 +42,7 @@ function Login(props){
             setMsg("Enter Password");
         }else if(mail!=="" && password!==""){
 
-            const req = await fetch(process.env.REACT_APP_LOGIN,{method:'POST', body: form});
+            const req = await fetch(process.env.REACT_APP_LOGIN,{method:'POST', body: form, credentials: 'include'});   // include for cross origin request(different url for frontend(3000) and backend server(5000))
             if(req.status===404){
                 setMsg("User not found");
             }else if(req.status===401){
@@ -75,7 +75,7 @@ function Login(props){
         }else if(password!==matchPassword){
             setMsg("Password Mismatch");
         }else if(mail!=="" && password!=="" && otp!=="" && password===matchPassword){
-            const req = await fetch(process.env.REACT_APP_RESET_SIGNUP, {method:"POST",body: form});
+            const req = await fetch(process.env.REACT_APP_RESET_SIGNUP, {method:"POST",body: form, credentials: 'include'});
             if(req.status===401){
                 setMsg("Wrong OTP");
             }else if(req.status===500){

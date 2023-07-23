@@ -5,12 +5,12 @@ const multer = require('multer');
 const {GridFsStorage} = require('multer-gridfs-storage');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-
+const jwt = require('jsonwebtoken');
 
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL , credentials: true }));
 app.use(bodyParser.urlencoded({ extended: true }));    // Parse URL-encoded bodies (form data)
 
 const server = app.listen(5000, function(){
@@ -262,9 +262,28 @@ app.post("/login",multer().none(), async (req,res) => {
     }else if(password!==user.password){
       res.status(401).send("Incorrect Password"); 
     }else{
+
+      // jwt token parameters
+      const payload = {
+        userId: mail
+      }
+      const options = {
+        expiresIn: '7d'                              // token expire in 7 days
+      }
+      // create token
+      const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, options);
+
+      // storing token as a cookie
+      const cookieOptions = {
+        maxAge: 7*24*60*60*1000                      // cookie expire in 7 days
+      }
+      res.cookie('pass',token,cookieOptions);
+
       res.status(200).send("Login Successfull");
+
     }
   }catch(err){
+    console.log(err);
     res.status(500).send(err);
   }
 
@@ -277,6 +296,23 @@ app.post("/resetSignup",multer().none(), async (req,res) => {
     if(sentOtp!==null && !isNaN(otpValue) && sentOtp.otp===parseInt(otpValue) && password.length!=0){
       await users.findOneAndUpdate({email: mail},{email: mail,password: password},{upsert: true});
       console.log("User created/password reseted successfully");
+
+      // jwt token parameters
+      const payload = {
+        userId: mail
+      }
+      const options = {
+        expiresIn: '7d'
+      }
+      // create token
+      const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, options);
+
+      // storing token as a cookie
+      const cookieOptions = {
+        maxAge: 7*24*60*60*1000
+      }
+      res.cookie('pass',token,cookieOptions);
+
       res.status(200).send("User created/password reseted successfully");
     }else{
       console.log("Wrong otp");
