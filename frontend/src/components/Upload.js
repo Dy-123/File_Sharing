@@ -37,8 +37,6 @@ function Upload(){
       }else {
 
         const formData = new FormData();
-        
-        // https://stackoverflow.com/questions/39589022/node-js-multer-and-req-body-empty
         formData.append("expiryTime",expDate);
         formData.append("noOfDownload",downloadCount);
         formData.append("isPublic",privacy);
@@ -49,9 +47,6 @@ function Upload(){
 
         const xhr = new XMLHttpRequest();
 
-        // listen for upload progress
-        // using fetch to upload files but fetch doesn't have support to monitor upload progress. Src: https://javascript.info/fetch-progress
-        // See previous version of file for commented fetch implemented
         xhr.upload.onprogress = function (event) {
           // find the percentage of uploaded
           let percent = Math.round((event.loaded / event.total)*100);
