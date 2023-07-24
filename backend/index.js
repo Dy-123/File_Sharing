@@ -6,11 +6,13 @@ const {GridFsStorage} = require('multer-gridfs-storage');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 require("dotenv").config();
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_URL , credentials: true }));
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));    // Parse URL-encoded bodies (form data)
 
 const server = app.listen(5000, function(){
@@ -96,6 +98,19 @@ const storage = new GridFsStorage({
         const isPublic = req.body.isPublic==='true';
         const passwordValue = req.body.password;
 
+        var uploadedBy = 'anonymous';
+        if(req.cookies!==undefined && req.cookies.pass!==undefined){
+          try{
+            const token = req.cookies.pass;
+            const payload=jwt.verify(token,process.env.JWT_PRIVATE_KEY);
+            uploadedBy = payload.userId;
+          }catch(err){
+            console.log('catch block executed');
+            
+          }
+        }
+        // console.log(uploadedBy);
+
         const fileInfo = {
           filename: filename,
           metadata:{
@@ -103,7 +118,8 @@ const storage = new GridFsStorage({
             expiryTime: expTime,
             noOfDownload: noOfDown,
             isPublic: isPublic,
-            password: passwordValue
+            password: passwordValue,
+            uploadedBy: uploadedBy
           },
           bucketName: "newBucket"
         };
@@ -169,8 +185,6 @@ app.get("/publicFiles", async (req,res) => {
 
   const cursor = bucket.find({});
   const files = await cursor.toArray();
-
-  console.log("Delete request recieved");
 
   var publicFiles=[];
   for(var i=0;i<files.length;++i){
@@ -275,9 +289,11 @@ app.post("/login",multer().none(), async (req,res) => {
 
       // storing token as a cookie
       const cookieOptions = {
+        httpOnly: true,
         maxAge: 7*24*60*60*1000                      // cookie expire in 7 days
       }
       res.cookie('pass',token,cookieOptions);
+      res.cookie('mail',mail,{maxAge: 7*24*60*60*1000});
 
       res.status(200).send("Login Successfull");
 
@@ -309,9 +325,11 @@ app.post("/resetSignup",multer().none(), async (req,res) => {
 
       // storing token as a cookie
       const cookieOptions = {
+        httpOnly: true,
         maxAge: 7*24*60*60*1000
       }
       res.cookie('pass',token,cookieOptions);
+      res.cookie('mail',mail,{maxAge: 7*24*60*60*1000});
 
       res.status(200).send("User created/password reseted successfully");
     }else{
@@ -321,4 +339,75 @@ app.post("/resetSignup",multer().none(), async (req,res) => {
   }catch(err){
     res.status(500).send(err);
   }
+});
+
+app.get("/myFiles", async(req,res) => {
+
+  if(req.cookies===undefined || req.cookies.pass===undefined){
+    res.send([]);
+  }else{
+    const token = req.cookies.pass;
+    try{
+      const payload=jwt.verify(token,process.env.JWT_PRIVATE_KEY);
+      const mailId = payload.userId;
+
+      const cursor = bucket.find({'metadata.uploadedBy': mailId});
+      const files = await cursor.toArray();
+    
+      var myFiles=[];
+      for(var i=0;i<files.length;++i){
+        console.log(files[i]);
+        if(Date.parse(files[i].metadata.expiryTime)<=Date.now()){
+    
+          // can try locking mechanism also, for try and catch can utlise promise .then() .catch()
+          try{
+            await bucket.delete(files[i]._id);
+          }catch{
+            
+          }
+          
+        }else{
+          delete(files[i]._id);
+          myFiles.push(files[i]);          
+        }
+      }
+      console.log("Number of my files are: "+myFiles.length);
+      res.status(200).send(myFiles);
+      
+    }catch(err){
+      res.send([]);
+    }
+
+  }
+
+});
+
+app.get("/logout",async (req,res)=>{
+
+  console.log("Log out requet received");
+
+  // From express documentation of res.clearCookie: Web browsers and other compliant clients will only clear 
+  // the cookie if the given options is identical to those given to res.cookie(), excluding expires and maxAge.
+  if(req.cookies!==undefined && req.cookies.pass!==undefined){
+
+    const cookieOptions = {
+      httpOnly: true,
+      expires: new Date(0)
+    }
+    res.clearCookie('pass',cookieOptions);
+    res.clearCookie('mail',{expires: new Date(0)});
+
+  }else{
+    if(req.cookies!==undefined){
+      res.clearCookie('mail',{expires: new Date(0)});
+    }
+  }
+  res.send("Logout successfull");
+
+});
+
+app.get("/deleteFile", async (req,res) => {
+
+
+
 });

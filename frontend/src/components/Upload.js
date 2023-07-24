@@ -46,6 +46,7 @@ function Upload(){
         setText("File is being uploaded...");
 
         const xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;                        // XMLHttpRequest will include credentials like cookies in the request headers when sending the request to the server
 
         xhr.upload.onprogress = function (event) {
           // find the percentage of uploaded

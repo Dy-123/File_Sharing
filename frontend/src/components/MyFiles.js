@@ -24,9 +24,12 @@ function MyFiles(){
 
 
   useEffect(() => {
+
       const fetchData = async () => {
         try {
-          const response = await fetch(process.env.REACT_APP_PUBLIC_FILES);
+
+          const response = await fetch(process.env.REACT_APP_MY_FILES, { credentials: 'include' });
+
           const privateFiles = await response.json();
           privateFiles.reverse();
           
@@ -34,6 +37,7 @@ function MyFiles(){
 
           var tableContent = [];
           for(var i=0;i<privateFiles.length;++i){
+            console.log(privateFiles[i].metadata.isPublic);
             tableContent.push(
               <tr key={privateFiles[i].metadata.shortname}>
                 <td>{privateFiles[i].metadata.shortname}</td>
@@ -47,6 +51,8 @@ function MyFiles(){
                 </td>
                 <td>{formattedTime(privateFiles[i].metadata.expiryTime)}</td>
                 <td>{privateFiles[i].metadata.noOfDownload}</td>
+                <td>{privateFiles[i].metadata.isPublic===true ? 'Yes' : 'No'}</td>
+                <td>{privateFiles[i].metadata.password==='' ? 'None' : privateFiles[i].metadata.password}</td>
               </tr>
             );
           }
@@ -60,12 +66,25 @@ function MyFiles(){
     }, []);
 
     const loggedInCheck = () => {
-        return false;
+      if(document.cookie!==''){
+        const cookieString = document.cookie;
+        const cookies = cookieString.split(';');
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            const cookieName = cookie.split('=')[0];    // [cookieName, cookieValue] = cookie.split('=');
+
+            if (cookieName === 'mail') {
+                return true;
+            }
+        }
+      }
+      return false;
     }
     
     return (
-
-        loggedInCheck() === true ?
+      <div>
+        {loggedInCheck() === true ?
         (<div className="privateFiles">
           { tableContent === "" ? ( <p>Personal directory is loading...</p>) : 
             ( <table className="table table-hover">
@@ -75,16 +94,18 @@ function MyFiles(){
                   <td>File Name</td>
                   <td>Size</td>
                   <td>Expiry Time</td>
-                  <td>Download Left</td>
+                  <td>Download<br/> Left</td>
+                  <td>Public</td>
+                  <td>Password</td>
                 </tr>
               </thead>
               <tbody>{tableContent}</tbody>
             </table> ) 
           }
         </div>) :
-        (<div className="privateFiles"><p>Log in to view your files.</p></div>)
+        (<div className="privateFiles"><p>Log in to view your files.</p></div>)}
         
-
+      </div>
         
     );
 
