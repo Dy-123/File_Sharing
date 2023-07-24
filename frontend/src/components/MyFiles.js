@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function MyFiles(){
+function MyFiles(props){
   
   const [tableContent,setTableContent] = useState("");
 
@@ -32,12 +32,9 @@ function MyFiles(){
 
           const privateFiles = await response.json();
           privateFiles.reverse();
-          
-          console.log(privateFiles);
 
           var tableContent = [];
           for(var i=0;i<privateFiles.length;++i){
-            console.log(privateFiles[i].metadata.isPublic);
             tableContent.push(
               <tr key={privateFiles[i].metadata.shortname}>
                 <td>{privateFiles[i].metadata.shortname}</td>
@@ -63,7 +60,7 @@ function MyFiles(){
       };
     
       fetchData();
-    }, []);
+    }, [props.loginState]);
 
     const loggedInCheck = () => {
       if(document.cookie!==''){

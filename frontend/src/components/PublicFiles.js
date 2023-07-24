@@ -29,8 +29,6 @@ function PublicFiles(){
           const response = await fetch(process.env.REACT_APP_PUBLIC_FILES);
           const publicFiles = await response.json();
           publicFiles.reverse();
-          
-          console.log(publicFiles);
 
           var tableContent = [];
           for(var i=0;i<publicFiles.length;++i){

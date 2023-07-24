@@ -5,12 +5,15 @@ import Download from './components/Download';
 import Upload from './components/Upload';
 import PublicFiles from './components/PublicFiles';
 import MyFiles from './components/MyFiles';
+import { useState } from "react";
 
 function App() {
-  
+
+  const [loginState,setLoginState] = useState(false);
+
   return (
     <>
-      <Header/>
+      <Header loginState={loginState} setLoginState={setLoginState}/>
 
       <Router>
           <nav className="navBarLinks navbar-light bg-light ">
@@ -24,7 +27,7 @@ function App() {
             <Route path="/" element={<Download />} /> 
             <Route path="/upload" element={<Upload />} />
             <Route path="/publicfiles" element={<PublicFiles />} />
-            <Route path="/myfiles" element={<MyFiles />} />
+            <Route path="/myfiles" element={<MyFiles loginState={loginState} setLoginState={setLoginState}/>} />
           </Routes>
         
       </Router>

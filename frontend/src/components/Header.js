@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import LoginModal from '../modals/LoginModal';
 import '../App.css';
 
-function Header(){
+function Header(props){
     const [loginResetDisable,setLoginResetDisable] = useState(true);
     const [showLoginOption,setShowLoginOption] = useState(true);
 
@@ -25,6 +25,7 @@ function Header(){
                 }
             }
         }
+        props.setLoginState(!props.loginState);
     },[loginResetDisable]);
 
     const logoutClickEvent = async () => {
@@ -32,6 +33,7 @@ function Header(){
         console.log(document.cookie);
         if(document.cookie===''){              // If all cookies are cleared for website then only logout
             setShowLoginOption(true);
+            props.setLoginState(!props.loginState);
         }
     }
 
