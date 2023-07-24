@@ -25,8 +25,12 @@ function Header(props){
                 }
             }
         }
+
         props.setLoginState(!props.loginState);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     },[loginResetDisable]);
+    
 
     const logoutClickEvent = async () => {
         await fetch(process.env.REACT_APP_LOGOUT, {credentials: 'include'});

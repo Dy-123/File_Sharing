@@ -58,7 +58,7 @@ function Download(){
       
               // Update the progress here, e.g., update a progress bar
               setText(loaded/(1024*1024) + " MB of file: " + fileName + " has been downloaded. Downloading...");
-              console.log(loaded/(1024*1024) + " MB of file: " + fileName + " has been downloaded.");
+              // console.log(loaded/(1024*1024) + " MB of file: " + fileName + " has been downloaded.");
       
               chunks.push(value);
               return read();

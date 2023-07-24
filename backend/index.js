@@ -407,7 +407,26 @@ app.get("/logout",async (req,res)=>{
 });
 
 app.get("/deleteFile", async (req,res) => {
+  console.log("Delete file request received");
+  if(req.cookies===undefined || req.cookies.pass===undefined){
+    res.send("Unauthorised");
+  }else{
+    const token = req.cookies.pass;
+    try{
+      jwt.verify(token,process.env.JWT_PRIVATE_KEY);
+      const fileId = req.query.fileId;
+      
+      const cursor = bucket.find({'metadata.shortname': fileId});
+      const file = await cursor.toArray();
+      console.log(file);
+      await bucket.delete(file[0]._id);
 
-
-
+      console.log("File deletion successfull");
+      res.status(200).send("File Deleted");
+      
+    }catch(err){
+      console.log(err.message);
+      res.send("Unable to delete file");
+    }
+  }
 });

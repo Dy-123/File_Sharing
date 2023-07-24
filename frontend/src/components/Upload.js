@@ -54,7 +54,7 @@ function Upload(){
           let loaded = Math.round( event.loaded/(1024*1024) );
           let total = Math.round( event.total/(1024*1024) );
           setText("Uploaded "+loaded+"MB out of "+total+"MB. Upload progress is: "+percent+" percent. Uploading...");
-          console.log(percent);
+          // console.log(percent);
         };
 
         // handle error
@@ -94,6 +94,7 @@ function Upload(){
 
     const passwordToggleButton = () => {
       setPasswordProtection(!passwordProtection);
+      setPasswordValue("");
     }
 
     const passwordInputEvent = (event) => {
