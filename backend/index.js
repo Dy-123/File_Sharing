@@ -173,7 +173,6 @@ app.post('/download',upDown.none(), async (req, res) => {
           downloadStream.on('error', (err) => {
             console.error("Error during download stream:", err);
             res.status(500).send("Error while streaming the file");
-            throw new Error("File not found / retrieval error");  
           });
 
           downloadStream.pipe(res);

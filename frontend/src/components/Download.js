@@ -2,7 +2,7 @@ import {useState} from "react";
 
 function Download(){
     const [file,setFile] = useState(null);
-    const [text,setText] = useState("To download a shared file, enter its link or ID, click \"Download,\" and save it to your computer. Ensure sufficient storage space and a stable internet connection.");
+    const [text,setText] = useState("Enter file id to download the file");
     const [disabled,setDisabled] = useState(false); 
     const [passwordProtection, setPasswordProtection] = useState(false);
     const [passwordValue,setPasswordValue] = useState("");
@@ -28,8 +28,6 @@ function Download(){
         })
         .then(response => {
 
-          // console.log(response); 
-
           if(response.status===401){
             throw Error("File is password protected. Enter a correct file password to download it.");
           }else if (!response.ok) {
@@ -37,10 +35,7 @@ function Download(){
           }
 
           const contentLength = response.headers.get("content-disposition");
-          // console.log(contentLength);
-          // console.log(contentLength.substring(22,contentLength.length-1));
           originalName = contentLength.substring(22,contentLength.length-1);
-
 
           let loaded = 0;
           const chunks = [];
@@ -107,12 +102,8 @@ function Download(){
     return(
       <>
         <div className="uploadCard">
-            {/* <div className="download">
-                <input type='text' placeholder='Enter file id' style={{ marginRight: '10px',  width: "270px" }} onChange={changeEvent}></input>
-                <button className="btn btn-primary" disabled={disabled} onClick={downloadEvent}>Download</button>
-            </div> */}
 
-            <div className="container" style={{"marginTop":"1rem"}}>
+            <div className="input-container" style={{"marginTop":"1rem"}}>
               <div className="did-floating-label-content">
                 <input className="did-floating-input" type="text" placeholder=" " onChange={changeEvent}></input>
                 <label className="did-floating-label">File ID</label>
@@ -125,10 +116,9 @@ function Download(){
                 className={`toggle ${passwordProtection ? 'on' : 'off'}`}
                 onClick={passwordToggleButton}>
               </div>
-              {/* <input type="password" style={{"marginLeft":"3px"}} className="inputWidthD" onChange={passwordInputEvent} value={passwordValue} disabled={!passwordProtection}></input> */}
             </div>
 
-            <div className="container">
+            <div className="input-container">
               <div className="did-floating-label-content">
                 <input className="did-floating-input" type="password" placeholder=" " onChange={passwordInputEvent} value={passwordValue} disabled={!passwordProtection}></input>
                 <label className="did-floating-label">File Password</label>

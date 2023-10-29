@@ -3,15 +3,13 @@ import { useState, useRef } from "react";
 function Upload(){
 
     const [file,setFile] = useState("null");
-    const [text,setText] = useState("To share files, click \"Choose File\" to select from your computer. Start the upload process by clicking the button. Larger files may require more time and a stable internet connection.");
+    const [text,setText] = useState("Select a file, set no of copy and time till which it can be downladed.");
     const [disabled,setDisabled] = useState(false);
     const [isButtonVisible, setButtonVisible] = useState(false);
     const [copyText,setCopyText] = useState("");
     const [privacy, setPrivacy] = useState(false);
     const [downloadCount,setDownloadCount] = useState(1);
-    // const [expDate, setExpDate] = useState("");
     const [expDate, setExpDate] = useState(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16));
-    // const [passwordProtection,setPasswordProtection] = useState(false);
     const [passwordValue,setPasswordValue] = useState("");
 
     const fileSelectEvent = (event) => {
@@ -32,12 +30,7 @@ function Upload(){
       } else if(expDate==="" || Date.parse(expDate)<=Date.now()){
         setText("Enter a valid file expiry time");
         setDisabled(false);
-      }
-      // else if( passwordProtection===true && passwordValue===""){
-      //   sfetText("Password protection is selected enter a password");
-      //   setDisabled(false);
-      // }
-      else {
+      } else {
 
         const formData = new FormData();
         formData.append("expiryTime",expDate);
@@ -95,11 +88,6 @@ function Upload(){
       setExpDate(event.target.value);
     }
 
-    // const passwordToggleButton = () => {
-    //   setPasswordProtection(!passwordProtection);
-    //   setPasswordValue("");
-    // }
-
     const passwordInputEvent = (event) => {
       setPasswordValue(event.target.value);
     }
@@ -130,7 +118,7 @@ function Upload(){
 
     return (
       <>
-        <div className="uploadCard" style={{aspectRatio:"300/12"}}>
+        <div className="uploadCard">
           { file === 'null' || file === undefined ?
             (<div className="upload" onClick={handleDivClick}>
               <div>
@@ -161,43 +149,21 @@ function Upload(){
               <label style={{"marginRight":"25px","marginLeft":"5px" }}>Public</label>
             </div>
 
-            {/* <div className="uploadOptions">
-              <label>Download Count</label>
-              <input type='number' className="inputWidthA" onChange={countDownloadEvent} value={downloadCount}></input>
-            </div> */}
-
-            <div className="container">
+            <div className="input-container">
               <div className="did-floating-label-content">
                 <input className="did-floating-input" style={{minWidth:"250px"}} type="number" placeholder=" " onChange={countDownloadEvent} value={downloadCount}></input>
                 <label className="did-floating-label">Download Count</label>
               </div>
             </div>
-            
 
-            {/* <div className="uploadOptions">
-              <label>File Expiry</label>
-              <input type='datetime-local' className="inputWidthB" onChange={expiryDateEvent}></input>
-            </div> */}
-
-            <div className="container">
+            <div className="input-container">
               <div className="did-floating-label-content">
                 <input className="did-floating-input" style={{minWidth:"250px"}} type="datetime-local" placeholder=" " onChange={expiryDateEvent} value={expDate}></input>
                 <label className="did-floating-label">File Expiry Time</label>
               </div>
             </div>
 
-            {/* { privacy===false ?
-            (<div className="uploadOptions">
-              <label style={{"marginRight":"3px"}} >Password Protection</label>
-              <div
-                className={`toggle ${passwordProtection ? 'on' : 'off'}`}
-                onClick={passwordToggleButton}>
-              </div>
-              {passwordProtection===true ? <input type="password" style={{"marginLeft":"3px"}} className="inputWidthC" onChange={passwordInputEvent} value={passwordValue}></input> : <></>}
-            </div>) : <></>
-            } */}
-
-            <div className="container">
+            <div className="input-container">
               <div className="did-floating-label-content">
                 <input className="did-floating-input" style={{minWidth:"250px"}} disabled={privacy} type="password" placeholder=" " onChange={passwordInputEvent} value={passwordValue}></input>
                 <label className="did-floating-label">File Password</label>

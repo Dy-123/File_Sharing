@@ -4,6 +4,7 @@ function MyFiles(props){
   
   const [tableContent,setTableContent] = useState("");
   const [fileDeletedState,setFileDeletedState] = useState(false);
+  const [linearContent, setLinearContent] = useState("");
 
   const formattedTime = (time) => {
 
@@ -40,37 +41,92 @@ function MyFiles(props){
           const privateFiles = await response.json();
           privateFiles.reverse();
 
-          var tableContent = [];
-          for(var i=0;i<privateFiles.length;++i){
-            const params = new URLSearchParams();
-            params.append("fileId",privateFiles[i].metadata.shortname);
-            tableContent.push(
-              <tr key={privateFiles[i].metadata.shortname}>
-                <td>{privateFiles[i].metadata.shortname}</td>
-                <td>{trimFileName(privateFiles[i].filename)}</td>
-                <td>
-                  { Math.round(((privateFiles[i].length/(1024*1024))*10))/10 === 0 ? 
-                  Math.round(((privateFiles[i].length/(1024*1024))*100))/100 === 0 ?
-                  `${Math.round(((privateFiles[i].length)*10))/10} B` : 
-                  `${Math.round(((privateFiles[i].length/(1024))*10))/10} KB` :
-                  `${Math.round(((privateFiles[i].length/(1024*1024))*10))/10} MB` }
-                </td>
-                <td>{formattedTime(privateFiles[i].metadata.expiryTime)}</td>
-                <td>{privateFiles[i].metadata.noOfDownload}</td>
-                <td>{privateFiles[i].metadata.isPublic===true ? 'Yes' : 'No'}</td>
-                <td>{privateFiles[i].metadata.password==='' ? 'None' : privateFiles[i].metadata.password}</td>
-                <td>
-                  <button style={{border: 'none', background:'transparent'}} onClick={async () => {await fetch(process.env.REACT_APP_DELETE+`?${params.toString()}`,{credentials: 'include'}); setFileDeletedState(!fileDeletedState);}}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
-                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
-                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            );
+          if(window.screen.availWidth>=700){
+            var tableContent = [];
+            for(let i=0;i<privateFiles.length;++i){
+              const params = new URLSearchParams();
+              params.append("fileId",privateFiles[i].metadata.shortname);
+              tableContent.push(
+                <tr key={privateFiles[i].metadata.shortname}>
+                  <td>{privateFiles[i].metadata.shortname}</td>
+                  <td>{trimFileName(privateFiles[i].filename)}</td>
+                  <td>
+                    { Math.round(((privateFiles[i].length/(1024*1024))*10))/10 === 0 ? 
+                    Math.round(((privateFiles[i].length/(1024*1024))*100))/100 === 0 ?
+                    `${Math.round(((privateFiles[i].length)*10))/10} B` : 
+                    `${Math.round(((privateFiles[i].length/(1024))*10))/10} KB` :
+                    `${Math.round(((privateFiles[i].length/(1024*1024))*10))/10} MB` }
+                  </td>
+                  <td>{formattedTime(privateFiles[i].metadata.expiryTime)}</td>
+                  <td>{privateFiles[i].metadata.noOfDownload}</td>
+                  <td>{privateFiles[i].metadata.isPublic===true ? 'Yes' : 'No'}</td>
+                  <td>{privateFiles[i].metadata.password==='' ? 'None' : privateFiles[i].metadata.password}</td>
+                  <td>
+                    <button style={{border: 'none', background:'transparent'}} onClick={async () => {await fetch(process.env.REACT_APP_DELETE+`?${params.toString()}`,{credentials: 'include'}); setFileDeletedState(!fileDeletedState);}}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              );
+            }
+            setTableContent(tableContent);
+          }else{
+            var linearContent = [];
+            for(let i=0;i<privateFiles.length;++i){
+              const params = new URLSearchParams();
+              params.append('fileId',privateFiles[i].metadata.shortname);
+              linearContent.push(
+              <div key={"linear"+privateFiles[i].metadata.shortname}>
+                <div className="container">
+                    <div className="col-lg-4">
+                        <div className="card card-margin">
+                            <div className="card-header no-border">
+                                <h5 className="card-title">{privateFiles[i].metadata.shortname}</h5>
+                            </div>
+                            <div className="card-body pt-0">
+                                <div className="widget-49">
+                                    <div className="widget-49-title-wrapper">
+                                        <div className="widget-49-date-primary">
+                                            { Math.round(((privateFiles[i].length/(1024*1024))*10))/10 === 0 ? 
+                                                Math.round(((privateFiles[i].length/(1024*1024))*100))/100 === 0 ?
+                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].length)*10))/10}</span>
+                                                <span className="widget-49-date-month">Byte</span></>) : 
+                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].length/(1024))*10))/10}</span>
+                                                <span className="widget-49-date-month">KB</span></>) :
+                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].length/(1024*1024))*10))/10}</span>
+                                                <span className="widget-49-date-month">MB</span></>) }
+                                        </div>
+                                        <div className="widget-49-meeting-info">
+                                            <span className="widget-49-pro-title">{trimFileName(privateFiles[i].filename)}</span>
+                                            <span className="widget-49-meeting-time">{formattedTime(privateFiles[i].metadata.expiryTime)}</span>
+                                        </div>
+                                    </div>
+                                    <ul className="widget-49-meeting-points">
+                                        <li className="widget-49-meeting-item"><span>Download Left: {privateFiles[i].metadata.noOfDownload}</span></li>
+                                        <li className="widget-49-meeting-item"><span>Public File: {privateFiles[i].metadata.isPublic===true ? 'Yes' : 'No'}</span></li>
+                                        <li className="widget-49-meeting-item"><span>Password: {privateFiles[i].metadata.password==='' ? 'None' : privateFiles[i].metadata.password}</span></li>
+                                    </ul>
+                                    <div className="widget-49-meeting-action">
+                                        <button style={{border: 'none', background:'transparent'}} onClick={async () => {await fetch(process.env.REACT_APP_DELETE+`?${params.toString()}`,{credentials: 'include'}); setFileDeletedState(!fileDeletedState);}}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
+                                              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                              <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </div>
+              );
+            }
+            setLinearContent(linearContent);
           }
-          setTableContent(tableContent);
         } catch (error) {
           console.error("Error fetching public files:", error);
         }
@@ -99,31 +155,43 @@ function MyFiles(props){
     return (
       <div>
         {loggedInCheck() === true ?
-        (<div className="privateFiles">
-          { tableContent === "" ? ( <p>Personal directory is loading...</p>) : 
-            ( <table className="table table-hover" style={{"width":"100%"}}>
-              <thead>
-                <tr>
-                  <td style={{"width":"10%"}}>File id</td>
-                  <td style={{"width":"25%"}}>File Name</td>
-                  <td style={{"width":"10%"}}>Size</td>
-                  <td style={{"width":"25%"}}>Expiry Time</td>
-                  <td style={{"width":"10%"}}>Download<br/> Left</td>
-                  <td style={{"width":"10%"}}>Public</td>
-                  <td style={{"width":"10%"}}>Password</td>
-                  <td></td>
-                </tr>
-              </thead>
-              <tbody>{tableContent}</tbody>
-            </table> ) 
-          }
-        </div>) :
-        (<div className="privateFiles"><p>Log in to view your files.</p></div>)}
-        
+          (<div className="files">
+            { (tableContent === "" && linearContent==="") ? ( <p>Personal directory is loading...</p>) : 
+              ( 
+                <div>
+                  {window.screen.availWidth >= 700 ?              
+                    (<div className="table-responsive">
+                      <table className="table table-hover">
+                          <thead>
+                            <tr>
+                              <td style={{"width":"10%"}}>File id</td>
+                              <td style={{"width":"25%"}}>File Name</td>
+                              <td style={{"width":"10%"}}>Size</td>
+                              <td style={{"width":"25%"}}>Expiry Time</td>
+                              <td style={{"width":"15%"}}>Download Left</td>
+                              <td style={{"width":"5%"}}>Public</td>
+                              <td style={{"width":"10%"}}>Password</td>
+                              <td></td>
+                            </tr>
+                          </thead>
+                          <tbody>{tableContent}</tbody>
+                        </table>
+                      </div>)
+                    :
+                    (
+                      <div>
+                        {linearContent}
+                      </div>
+                    )
+                  }
+                </div>
+              ) 
+            }
+          </div> ) :
+          (<div className="privateFiles" style={{"display":"flex"}}><p>Log in to view your files.</p></div>)
+        }        
       </div>
-        
     );
-
 }
 
 export default MyFiles;

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 function PublicFiles(){
   
   const [tableContent,setTableContent] = useState("");
-  // const [linearContent, setLinearContent] = useState("");
+  const [linearContent, setLinearContent] = useState("");
 
   const formattedTime = (time) => {
 
@@ -37,46 +37,67 @@ function PublicFiles(){
           const publicFiles = await response.json();
           publicFiles.reverse();
 
-          var tableContent = [];
-          for(var i=0;i<publicFiles.length;++i){
-            tableContent.push(
-              <tr key={publicFiles[i].metadata.shortname}>
-                <td>{publicFiles[i].metadata.shortname}</td>
-                <td>{trimFileName(publicFiles[i].filename)}</td>
-                <td>
-                  { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
-                  Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
-                  `${Math.round(((publicFiles[i].length)*10))/10} B` : 
-                  `${Math.round(((publicFiles[i].length/(1024))*10))/10} KB` :
-                  `${Math.round(((publicFiles[i].length/(1024*1024))*10))/10} MB` }
-                </td>
-                <td>{formattedTime(publicFiles[i].metadata.expiryTime)}</td>
-                <td>{publicFiles[i].metadata.noOfDownload}</td>
-              </tr>
-            );
+          if(window.screen.availWidth>=700){
+            var tableContent = [];
+            for(let i=0;i<publicFiles.length;++i){
+              tableContent.push(
+                <tr key={publicFiles[i].metadata.shortname}>
+                  <td>{publicFiles[i].metadata.shortname}</td>
+                  <td>{trimFileName(publicFiles[i].filename)}</td>
+                  <td>
+                    { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
+                    Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
+                    `${Math.round(((publicFiles[i].length)*10))/10} B` : 
+                    `${Math.round(((publicFiles[i].length/(1024))*10))/10} KB` :
+                    `${Math.round(((publicFiles[i].length/(1024*1024))*10))/10} MB` }
+                  </td>
+                  <td>{formattedTime(publicFiles[i].metadata.expiryTime)}</td>
+                  <td>{publicFiles[i].metadata.noOfDownload}</td>
+                </tr>
+              );
+            }
+            setTableContent(tableContent);
+          }else{
+            var linearContent = [];
+            for(let i=0;i<publicFiles.length;++i){
+              linearContent.push(
+                <div key={"linear"+publicFiles[i].metadata.shortname}>
+                  <div className="container">
+                      <div className="col-lg-4">
+                          <div className="card card-margin">
+                              <div className="card-header no-border">
+                                  <h5 className="card-title">{publicFiles[i].metadata.shortname}</h5>
+                              </div>
+                              <div className="card-body pt-0">
+                                  <div className="widget-49">
+                                      <div className="widget-49-title-wrapper">
+                                          <div className="widget-49-date-primary">
+                                              { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
+                                                  Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
+                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].length)*10))/10}</span>
+                                                  <span className="widget-49-date-month">Byte</span></>) : 
+                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].length/(1024))*10))/10}</span>
+                                                  <span className="widget-49-date-month">KB</span></>) :
+                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].length/(1024*1024))*10))/10}</span>
+                                                  <span className="widget-49-date-month">MB</span></>) }
+                                          </div>
+                                          <div className="widget-49-meeting-info">
+                                              <span className="widget-49-pro-title">{trimFileName(publicFiles[i].filename)}</span>
+                                              <span className="widget-49-meeting-time">{formattedTime(publicFiles[i].metadata.expiryTime)}</span>
+                                              <span className="widget-49-meeting-time">Download Left: {publicFiles[i].metadata.noOfDownload}</span>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                </div>          
+              );
+            }
+            setLinearContent(linearContent);
           }
 
-          // var linearContent = [];
-          // for(var i=0;i<publicFiles.length;++i){
-          //   linearContent.push(
-          //     <div key={'linear'+publicFiles[i].metadata.shortname}>
-          //       <p>{publicFiles[i].metadata.shortname}</p>
-          //       <p>{trimFileName(publicFiles[i].filename)}</p>
-          //       <p>
-          //         { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
-          //         Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
-          //         `${Math.round(((publicFiles[i].length)*10))/10} B` : 
-          //         `${Math.round(((publicFiles[i].length/(1024))*10))/10} KB` :
-          //         `${Math.round(((publicFiles[i].length/(1024*1024))*10))/10} MB` }
-          //       </p>
-          //       <p>{formattedTime(publicFiles[i].metadata.expiryTime)}</p>
-          //       <p>{publicFiles[i].metadata.noOfDownload}</p>     
-          //     </div>           
-          //   );
-          // }
-
-          setTableContent(tableContent);
-          // setLinearContent(linearContent);
         } catch (error) {
           console.error("Error fetching public files:", error);
         }
@@ -86,28 +107,30 @@ function PublicFiles(){
     }, []);
     
     return (
-        <div className="publicFiles">
-          { tableContent === "" ? ( <p>Public directory is loading...</p>) : 
+        <div className="files">
+          { (tableContent === "" && linearContent==="") ? ( <p>Public directory is loading...</p>) : 
             ( 
               <div>
+                {window.screen.availWidth>=700 ? 
                 <div className="table-responsive">
-                  <table className="table table-hover" style={{"width":"100%"}}>
+                  <table className="table table-hover" style={{"width":"100%", "minWidth":"660px"}}>
                     <thead>
                       <tr>
                         <td style={{"width":"10%"}}>File ID</td>
-                        <td style={{"width":"35%"}}>File Name</td>
+                        <td style={{"width":"30%"}}>File Name</td>
                         <td style={{"width":"10%"}}>Size</td>
                         <td style={{"width":"25%"}}>Expiry Time</td>
-                        <td style={{"width":"10%"}}>Download Left</td>
+                        <td style={{"width":"15%"}}>Download Left</td>
                       </tr>
                     </thead>
                     <tbody>{tableContent}</tbody>
                   </table>
                 </div>
-
-                {/* <div>
+                :
+                <div>
                   {linearContent}
-                </div> */}
+                </div>
+              }
               </div>
             )
           }
