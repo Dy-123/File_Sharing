@@ -105,26 +105,44 @@ function Download(){
     }
 
     return(
-        <div>
-            <div className="download">
+      <>
+        <div className="uploadCard">
+            {/* <div className="download">
                 <input type='text' placeholder='Enter file id' style={{ marginRight: '10px',  width: "270px" }} onChange={changeEvent}></input>
                 <button className="btn btn-primary" disabled={disabled} onClick={downloadEvent}>Download</button>
+            </div> */}
+
+            <div className="container" style={{"marginTop":"1rem"}}>
+              <div className="did-floating-label-content">
+                <input className="did-floating-input" type="text" placeholder=" " onChange={changeEvent}></input>
+                <label className="did-floating-label">File ID</label>
+              </div>
             </div>
 
-            <div className="downloadOptions">
-              <label style={{"marginRight":"3px"}} >File Password Protected</label>
+            <div className="downloadOptions" style={{"marginBottom":"1rem"}}>
+              <label style={{"marginRight":"3px"}} >Password Protected</label>
               <div
                 className={`toggle ${passwordProtection ? 'on' : 'off'}`}
                 onClick={passwordToggleButton}>
               </div>
-              <input type="password" style={{"marginLeft":"3px"}} className="inputWidthD" onChange={passwordInputEvent} value={passwordValue} disabled={!passwordProtection}></input>
+              {/* <input type="password" style={{"marginLeft":"3px"}} className="inputWidthD" onChange={passwordInputEvent} value={passwordValue} disabled={!passwordProtection}></input> */}
             </div>
 
-            <div>
-                <p className="text">{text}</p>
+            <div className="container">
+              <div className="did-floating-label-content">
+                <input className="did-floating-input" type="password" placeholder=" " onChange={passwordInputEvent} value={passwordValue} disabled={!passwordProtection}></input>
+                <label className="did-floating-label">File Password</label>
+              </div>
             </div>
 
+            <button className="btn btn-primary" disabled={disabled} onClick={downloadEvent}>Download</button>
         </div>
+
+          <div>
+              <p className="text">{text}</p>
+          </div>
+
+      </>
     );
 }
 

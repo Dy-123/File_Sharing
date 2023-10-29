@@ -23,6 +23,12 @@ function MyFiles(props){
 
   }
 
+  const trimFileName = (filename) => {
+    if(typeof filename === 'string' && filename.length>20){
+      return filename.slice(0, 10) + '...' + filename.slice(filename.length-10,filename.length) + '';
+    }
+    return filename;
+  }
 
   useEffect(() => {
 
@@ -41,7 +47,7 @@ function MyFiles(props){
             tableContent.push(
               <tr key={privateFiles[i].metadata.shortname}>
                 <td>{privateFiles[i].metadata.shortname}</td>
-                <td>{privateFiles[i].filename}</td>
+                <td>{trimFileName(privateFiles[i].filename)}</td>
                 <td>
                   { Math.round(((privateFiles[i].length/(1024*1024))*10))/10 === 0 ? 
                   Math.round(((privateFiles[i].length/(1024*1024))*100))/100 === 0 ?
@@ -95,16 +101,16 @@ function MyFiles(props){
         {loggedInCheck() === true ?
         (<div className="privateFiles">
           { tableContent === "" ? ( <p>Personal directory is loading...</p>) : 
-            ( <table className="table table-hover">
+            ( <table className="table table-hover" style={{"width":"100%"}}>
               <thead>
                 <tr>
-                  <td>File id</td>
-                  <td>File Name</td>
-                  <td>Size</td>
-                  <td>Expiry Time</td>
-                  <td>Download<br/> Left</td>
-                  <td>Public</td>
-                  <td>Password</td>
+                  <td style={{"width":"10%"}}>File id</td>
+                  <td style={{"width":"25%"}}>File Name</td>
+                  <td style={{"width":"10%"}}>Size</td>
+                  <td style={{"width":"25%"}}>Expiry Time</td>
+                  <td style={{"width":"10%"}}>Download<br/> Left</td>
+                  <td style={{"width":"10%"}}>Public</td>
+                  <td style={{"width":"10%"}}>Password</td>
                   <td></td>
                 </tr>
               </thead>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 function PublicFiles(){
   
   const [tableContent,setTableContent] = useState("");
+  // const [linearContent, setLinearContent] = useState("");
 
   const formattedTime = (time) => {
 
@@ -22,6 +23,12 @@ function PublicFiles(){
 
   }
 
+  const trimFileName = (filename) => {
+    if(typeof filename === 'string' && filename.length>30){
+      return filename.slice(0, 15) + '...' + filename.slice(filename.length-15,filename.length) + '';
+    }
+    return filename;
+  }
 
   useEffect(() => {
       const fetchData = async () => {
@@ -35,7 +42,7 @@ function PublicFiles(){
             tableContent.push(
               <tr key={publicFiles[i].metadata.shortname}>
                 <td>{publicFiles[i].metadata.shortname}</td>
-                <td>{publicFiles[i].filename}</td>
+                <td>{trimFileName(publicFiles[i].filename)}</td>
                 <td>
                   { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
                   Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
@@ -48,7 +55,28 @@ function PublicFiles(){
               </tr>
             );
           }
+
+          // var linearContent = [];
+          // for(var i=0;i<publicFiles.length;++i){
+          //   linearContent.push(
+          //     <div key={'linear'+publicFiles[i].metadata.shortname}>
+          //       <p>{publicFiles[i].metadata.shortname}</p>
+          //       <p>{trimFileName(publicFiles[i].filename)}</p>
+          //       <p>
+          //         { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
+          //         Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
+          //         `${Math.round(((publicFiles[i].length)*10))/10} B` : 
+          //         `${Math.round(((publicFiles[i].length/(1024))*10))/10} KB` :
+          //         `${Math.round(((publicFiles[i].length/(1024*1024))*10))/10} MB` }
+          //       </p>
+          //       <p>{formattedTime(publicFiles[i].metadata.expiryTime)}</p>
+          //       <p>{publicFiles[i].metadata.noOfDownload}</p>     
+          //     </div>           
+          //   );
+          // }
+
           setTableContent(tableContent);
+          // setLinearContent(linearContent);
         } catch (error) {
           console.error("Error fetching public files:", error);
         }
@@ -60,18 +88,28 @@ function PublicFiles(){
     return (
         <div className="publicFiles">
           { tableContent === "" ? ( <p>Public directory is loading...</p>) : 
-            ( <table className="table table-hover">
-              <thead>
-                <tr>
-                  <td>File id</td>
-                  <td>File Name</td>
-                  <td>Size</td>
-                  <td>Expiry Time</td>
-                  <td>Download Left</td>
-                </tr>
-              </thead>
-              <tbody>{tableContent}</tbody>
-            </table> ) 
+            ( 
+              <div>
+                <div className="table-responsive">
+                  <table className="table table-hover" style={{"width":"100%"}}>
+                    <thead>
+                      <tr>
+                        <td style={{"width":"10%"}}>File ID</td>
+                        <td style={{"width":"35%"}}>File Name</td>
+                        <td style={{"width":"10%"}}>Size</td>
+                        <td style={{"width":"25%"}}>Expiry Time</td>
+                        <td style={{"width":"10%"}}>Download Left</td>
+                      </tr>
+                    </thead>
+                    <tbody>{tableContent}</tbody>
+                  </table>
+                </div>
+
+                {/* <div>
+                  {linearContent}
+                </div> */}
+              </div>
+            )
           }
         </div>
     );

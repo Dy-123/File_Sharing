@@ -136,7 +136,7 @@ app.post('/upload',upload.single("fileUpload"),async (req,res)=>{
 
     const file = req.file;
     
-    console.log("File has been uploaded. File id: "+file.metadata.shortname);
+    console.log("File has been uploaded. File   id: "+file.metadata.shortname);
     res.send(file.metadata.shortname)
 
 });
@@ -145,38 +145,51 @@ app.post('/upload',upload.single("fileUpload"),async (req,res)=>{
 const upDown = multer();
 app.post('/download',upDown.none(), async (req, res) => {
 
-    const cursor = bucket.find({ 'metadata.shortname' : req.body.filename });
-    const files = await cursor.toArray();
+    try{
 
-    console.log("File info of requested file: ");
-    console.log(files);
+      const cursor = bucket.find({ 'metadata.shortname' : req.body.filename });
+      const files = await cursor.toArray();
 
-    if (files.length === 0) {
-      console.log('No files found');
-      res.status(404).send("File not found");
-    } else {
+      console.log("File info of requested file: ");
+      console.log(files);
 
-      if(files[0].metadata.password!='' && files[0].metadata.password!=req.body.password){
-        res.status(401).send("File is password protected.");
-      }else{
+      if (files.length === 0) {
+        console.log('No files found');
+        res.status(404).send("File not found");
+      } else {
 
-      // can utilise promise .then() .catch() instead of try and catch
-        try{
+        if(files[0].metadata.password!='' && files[0].metadata.password!=req.body.password){
+          res.status(401).send("File is password protected.");
+        }else{
+
           const filename = files[0].filename;
           const downloadStream = bucket.openDownloadStreamByName(filename);
           res.set('Content-Disposition', `attachment; filename="${filename}"`);
-          res.set({'Access-Control-Expose-Headers': 'Content-Disposition'});  
-          await downloadStream.pipe(res);
+          res.set({'Access-Control-Expose-Headers': 'Content-Disposition'});
+          
+          // Streams in Node.js are objects that extend EventEmitter. They can be used to read or write data to a stream. Streams are event based and don't directly support promises.
+          // error event listener to handle errors that might occur during the streaming process. There are a few ways to handle errors for streams in Node.js. One way is to use the error event.
+          // However, it's important to note that not all stream-related operations can be directly awaited because streams are inherently asynchronous and do not return Promises.
+          downloadStream.on('error', (err) => {
+            console.error("Error during download stream:", err);
+            res.status(500).send("Error while streaming the file");
+            throw new Error("File not found / retrieval error");  
+          });
+
+          downloadStream.pipe(res);
+
           if(files[0].metadata.noOfDownload<=1){
             bucket.delete(files[0]._id);
           }else{
             db.collection('newBucket.files').updateOne({_id:files[0]._id},{$set: {"metadata.noOfDownload": files[0].metadata.noOfDownload-1 }});
           }
-        }catch(err){
-          res.send("Someone removed the file");
+
         }
+
       }
 
+    }catch(err){
+      res.status(500).send(err.message);
     }
 
  });
