@@ -23,8 +23,11 @@ try {
     mongoose.connect(process.env.MONGO_CONN_URL, {
       useUnifiedTopology: true,
       useNewUrlParser: true
+    }).then(()=>{
+      console.log("MongoDB connected")
+    }).catch((err)=>{
+      console.log("MongoDB connection error: "+err);
     });
-    console.log("mongoose connected")
   } catch (error) {
     console.log("error in connection"+error)
   }
@@ -34,11 +37,9 @@ let bucket;
 let db;
 mongoose.connection.on("connected", () => {
   db = mongoose.connections[0].db;
-//   console.log(db)
   bucket = new mongoose.mongo.GridFSBucket(db, {
     bucketName: "newBucket"
   });
-//   console.log(bucket);
 });
 
 // Define the schema to count number of file that has been served
@@ -54,8 +55,7 @@ const generateShortName = (sitesCount) => {
   var count=sitesCount;
   var string='';
   while(count>0){
-      // console.log(count, count%26,String.fromCharCode(97 + count%26));
-      string= string.concat(String.fromCharCode(97 + count%26));           // ascii value of a is 97
+      string= string.concat(String.fromCharCode(97 + count%26));           
       count=Math.floor(count/26);
   }
 
@@ -82,7 +82,6 @@ const hashName = async () => {
 
 }
 
-
 const storage = new GridFsStorage({
     url: process.env.MONGO_CONN_URL,
     file: (req, file) => {
@@ -106,10 +105,8 @@ const storage = new GridFsStorage({
             uploadedBy = payload.userId;
           }catch(err){
             console.log('catch block executed');
-            
           }
         }
-        // console.log(uploadedBy);
 
         const fileInfo = {
           filename: filename,
@@ -143,6 +140,7 @@ app.post('/upload',upload.single("fileUpload"),async (req,res)=>{
 
 // using multer to parse the form data
 const upDown = multer();
+
 app.post('/download',upDown.none(), async (req, res) => {
 
     try{
