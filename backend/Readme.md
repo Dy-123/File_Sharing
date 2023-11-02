@@ -16,3 +16,8 @@ JWT_PRIVATE_KEY=
 FRONTEND_URL=         
 
 -------------------------------------------------------------------------------------------
+AWS_ACCESS_KEY=       
+AWS_SECRET_ACCESS_KEY=          
+        
+##### aws credentials which will be used to access aws-s3
+-------------------------------------------------------------------------------------------
