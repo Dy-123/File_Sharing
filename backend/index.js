@@ -2,13 +2,22 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
-const {GridFsStorage} = require('multer-gridfs-storage');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-
+const { S3Client, GetObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const multerS3 = require('multer-s3')
 require("dotenv").config();
+
+let s3 = new S3Client({
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  },
+  region: 'ap-south-1',
+});
+
 
 const app = express();
 app.use(cors({ origin: process.env.FRONTEND_URL , credentials: true }));
@@ -32,15 +41,20 @@ try {
     console.log("error in connection"+error)
   }
 
-//creating bucket
-let bucket;
-let db;
-mongoose.connection.on("connected", () => {
-  db = mongoose.connections[0].db;
-  bucket = new mongoose.mongo.GridFSBucket(db, {
-    bucketName: "newBucket"
-  });
+const fileDetailsSchema = new mongoose.Schema({
+  filename: {type:String},
+  size: {type:Number},
+  shortname: { type: String },
+  expiryTime: { type: Date },
+  noOfDownload: { type: Number },
+  isPublic: { type: Boolean },
+  password: { type: String },
+  uploadedBy: { type: String},
+  // awsS3Link: {type: String},
+  awsBucket: {type: String},
+  awsBuckeyFileKey: {type: String},
 });
+const fileDetails = mongoose.model('fileDetails', fileDetailsSchema);
 
 // Define the schema to count number of file that has been served
 const countSchema = new mongoose.Schema({
@@ -62,7 +76,6 @@ const generateShortName = (sitesCount) => {
   return string;
 };
 
-
 const hashName = async () => {
 
     const options = {
@@ -76,26 +89,26 @@ const hashName = async () => {
       { $inc: { count: 1 } },
       options
     )
-    
-    // console.log("Number of file serverd is: " + doc.count);
     return generateShortName(doc.count);
-
 }
 
-const storage = new GridFsStorage({
-    url: process.env.MONGO_CONN_URL,
-    file: (req, file) => {
-      return new Promise( async (resolve, reject) => {
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: 'file-sharing-files',
+    metadata: function (req, file, cb) {
+      console.log(req.body.expiryTime);
+      cb(null,{expiry: req.body.expiryTime});
+    }
+  }),
+}).single("fileUpload");
 
-        const filename = file.originalname;
-        const shortname = await hashName();
-
-        console.log(req.body);
-
-        const expTime = new Date(req.body.expiryTime);
-        const noOfDown = parseInt(req.body.noOfDownload);
-        const isPublic = req.body.isPublic==='true';
-        const passwordValue = req.body.password;
+app.post('/upload',(req,res)=>{
+    upload(req, res, async (error) => {
+      if(error){
+        console.log(req.body.expiryTime);
+        res.send("Error while uploading file");
+      }else{
 
         var uploadedBy = 'anonymous';
         if(req.cookies!==undefined && req.cookies.pass!==undefined){
@@ -108,66 +121,65 @@ const storage = new GridFsStorage({
           }
         }
 
-        const fileInfo = {
-          filename: filename,
-          metadata:{
-            shortname: shortname,
-            expiryTime: expTime,
-            noOfDownload: noOfDown,
-            isPublic: isPublic,
-            password: passwordValue,
-            uploadedBy: uploadedBy
-          },
-          bucketName: "newBucket"
-        };
-        resolve(fileInfo);
-      });
-    }
-  });
+        // console.log(req);
 
-  const upload = multer({
-    storage
-  });
+        const newFileDetails = new fileDetails({
+          filename: req.file.originalname,
+          size: req.file.size,
+          shortname: await hashName(),
+          expiryTime: new Date(req.body.expiryTime),
+          noOfDownload: parseInt(req.body.noOfDownload),
+          isPublic: req.body.isPublic==='true',
+          password: req.body.password,
+          uploadedBy: uploadedBy,
+          // awsS3Link: req.file.location,
+          awsBucket: req.file.bucket,
+          awsBuckeyFileKey: req.file.key,
 
-app.post('/upload',upload.single("fileUpload"),async (req,res)=>{
-
-    const file = req.file;
-    
-    console.log("File has been uploaded. File   id: "+file.metadata.shortname);
-    res.send(file.metadata.shortname)
-
+        });
+  
+        try {
+          await newFileDetails.save();
+          res.send('File uploaded successfully! File id: '+ newFileDetails.shortname);
+        } catch (err) {
+          console.error(err);
+          res.status(500).send('Error while saving uploaded file');
+        }
+      }
+    })
 });
 
 // using multer to parse the form data
 const upDown = multer();
-
 app.post('/download',upDown.none(), async (req, res) => {
 
     try{
+      const file =  await fileDetails.find({ 'shortname' : req.body.filename });
 
-      const cursor = bucket.find({ 'metadata.shortname' : req.body.filename });
-      const files = await cursor.toArray();
-
-      console.log("File info of requested file: ");
-      console.log(files);
-
-      if (files.length === 0) {
+      if (file.length===0) {
         console.log('No files found');
         res.status(404).send("File not found");
       } else {
 
-        if(files[0].metadata.password!='' && files[0].metadata.password!=req.body.password){
+        if(file[0].password!='' && file[0].password!=req.body.password){
           res.status(401).send("File is password protected.");
         }else{
 
-          const filename = files[0].filename;
-          const downloadStream = bucket.openDownloadStreamByName(filename);
-          res.set('Content-Disposition', `attachment; filename="${filename}"`);
+          const params = {
+            Bucket: file[0].awsBucket,
+            Key: file[0].awsBuckeyFileKey,
+          }
+
+          const command = new GetObjectCommand(params);
+          const response = await s3.send(command);
+          const downloadStream = await response.Body;
+
+          res.set('Content-Disposition', `attachment; filename="${file[0].filename}"`);
           res.set({'Access-Control-Expose-Headers': 'Content-Disposition'});
           
-          // Streams in Node.js are objects that extend EventEmitter. They can be used to read or write data to a stream. Streams are event based and don't directly support promises.
-          // error event listener to handle errors that might occur during the streaming process. There are a few ways to handle errors for streams in Node.js. One way is to use the error event.
-          // However, it's important to note that not all stream-related operations can be directly awaited because streams are inherently asynchronous and do not return Promises.
+          // // Streams in Node.js are objects that extend EventEmitter. They can be used to read or write data to a stream. Streams are event based and don't directly support promises.
+          // // error event listener to handle errors that might occur during the streaming process. There are a few ways to handle errors for streams in Node.js. One way is to use the error event.
+          // // However, it's important to note that not all stream-related operations can be directly awaited because streams are inherently asynchronous and do not return Promises.
           downloadStream.on('error', (err) => {
             console.error("Error during download stream:", err);
             res.status(500).send("Error while streaming the file");
@@ -175,16 +187,23 @@ app.post('/download',upDown.none(), async (req, res) => {
 
           downloadStream.pipe(res);
 
-          if(files[0].metadata.noOfDownload<=1){
-            bucket.delete(files[0]._id);
-          }else{
-            db.collection('newBucket.files').updateOne({_id:files[0]._id},{$set: {"metadata.noOfDownload": files[0].metadata.noOfDownload-1 }});
-          }
-
+          downloadStream.on('end', async ()=>{
+            console.log("Download ended");
+            try{
+              if(file[0].noOfDownload<=1){
+                const data = await s3.send(new DeleteObjectCommand(params));
+                // console.log("Success. Object deleted.", data);
+                await fileDetails.deleteOne({ _id: file[0]._id });
+              }else{
+                await fileDetails.updateOne({_id:file[0]._id},{$set: {"noOfDownload": file[0].noOfDownload-1 }});
+              }
+            }catch(err){
+              console.log('Error deleting/updating file',err);
+            }
+          })
+          // console.log("Database info update finished");
         }
-
       }
-
     }catch(err){
       res.status(500).send(err.message);
     }
@@ -193,23 +212,30 @@ app.post('/download',upDown.none(), async (req, res) => {
 
 app.get("/publicFiles", async (req,res) => {
 
-  const cursor = bucket.find({});
-  const files = await cursor.toArray();
-
+  const files = await fileDetails.find({});
   var publicFiles=[];
   for(var i=0;i<files.length;++i){
-    console.log(files[i]);
-    if(Date.parse(files[i].metadata.expiryTime)<=Date.now()){
+    // console.log(files[i]);
+    if(Date.parse(files[i].expiryTime)<=Date.now()){
 
-      // can try locking mechanism also, for try and catch can utlise promise .then() .catch()
       try{
-        await bucket.delete(files[i]._id);
-      }catch{
-        
+
+        // comment below if deleting file in amazon s3 through lifecycle management
+        const data = await s3.send(new DeleteObjectCommand({
+          Bucket: files[i].awsBucket,
+          Key: files[i].awsBuckeyFileKey,
+        }));
+        // console.log("Success. Object deleted.", data);
+
+        await fileDetails.deleteOne({ _id: files[i]._id });
+      }catch(err){
+        console.log('Error updating expired files in public files',err);
       }
       
-    }else if(files[i].metadata.isPublic){
+    }else if(files[i].isPublic){
       delete(files[i]._id);
+      delete(files[i].awsBucket);
+      delete(files[i].awsBuckeyFileKey);
       publicFiles.push(files[i]);
     }
   } 
@@ -361,23 +387,30 @@ app.get("/myFiles", async(req,res) => {
       const payload=jwt.verify(token,process.env.JWT_PRIVATE_KEY);
       const mailId = payload.userId;
 
-      const cursor = bucket.find({'metadata.uploadedBy': mailId});
-      const files = await cursor.toArray();
-    
+      const files = await fileDetails.find({'uploadedBy': mailId});
       var myFiles=[];
       for(var i=0;i<files.length;++i){
-        console.log(files[i]);
-        if(Date.parse(files[i].metadata.expiryTime)<=Date.now()){
+        // console.log(files[i]);
+        if(Date.parse(files[i].expiryTime)<=Date.now()){
     
-          // can try locking mechanism also, for try and catch can utlise promise .then() .catch()
           try{
-            await bucket.delete(files[i]._id);
-          }catch{
-            
+
+            // comment below if deleting file in amazon s3 through lifecycle management
+            const data = await s3.send(new DeleteObjectCommand({
+              Bucket: files[i].awsBucket,
+              Key: files[i].awsBuckeyFileKey,
+            }));
+            // console.log("Success. Object deleted.", data);
+
+            await fileDetails.deleteOne({ _id: files[i]._id });
+          }catch(err){
+            console.log('Error updating expired files in public files',err);
           }
           
         }else{
           delete(files[i]._id);
+          delete(files[i].awsBucket);
+          delete(files[i].awsBuckeyFileKey);
           myFiles.push(files[i]);          
         }
       }
@@ -426,10 +459,15 @@ app.get("/deleteFile", async (req,res) => {
       jwt.verify(token,process.env.JWT_PRIVATE_KEY);
       const fileId = req.query.fileId;
       
-      const cursor = bucket.find({'metadata.shortname': fileId});
-      const file = await cursor.toArray();
-      console.log(file);
-      await bucket.delete(file[0]._id);
+      const file = await fileDetails.find({'shortname': fileId});
+
+      // comment below if deleting file in amazon s3 through lifecycle management
+      const data = await s3.send(new DeleteObjectCommand({
+        Bucket: file[0].awsBucket,
+        Key: file[0].awsBuckeyFileKey,
+      }));
+      // console.log("Success. Object deleted.", data);
+      await fileDetails.deleteOne({ _id: file[0]._id });
 
       console.log("File deletion successfull");
       res.status(200).send("File Deleted");

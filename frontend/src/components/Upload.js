@@ -78,6 +78,7 @@ function Upload(){
 
     const privacyToggleButton = () => {
       setPrivacy(prevState => !prevState);
+      setPasswordValue("");
     };
 
     const countDownloadEvent = (event) => {

@@ -41,18 +41,18 @@ function PublicFiles(){
             var tableContent = [];
             for(let i=0;i<publicFiles.length;++i){
               tableContent.push(
-                <tr key={publicFiles[i].metadata.shortname}>
-                  <td>{publicFiles[i].metadata.shortname}</td>
+                <tr key={publicFiles[i].shortname}>
+                  <td>{publicFiles[i].shortname}</td>
                   <td>{trimFileName(publicFiles[i].filename)}</td>
                   <td>
-                    { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
-                    Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
-                    `${Math.round(((publicFiles[i].length)*10))/10} B` : 
-                    `${Math.round(((publicFiles[i].length/(1024))*10))/10} KB` :
-                    `${Math.round(((publicFiles[i].length/(1024*1024))*10))/10} MB` }
+                    { Math.round(((publicFiles[i].size/(1024*1024))*10))/10 === 0 ? 
+                    Math.round(((publicFiles[i].size/(1024*1024))*100))/100 === 0 ?
+                    `${Math.round(((publicFiles[i].size)*10))/10} B` : 
+                    `${Math.round(((publicFiles[i].size/(1024))*10))/10} KB` :
+                    `${Math.round(((publicFiles[i].size/(1024*1024))*10))/10} MB` }
                   </td>
-                  <td>{formattedTime(publicFiles[i].metadata.expiryTime)}</td>
-                  <td>{publicFiles[i].metadata.noOfDownload}</td>
+                  <td>{formattedTime(publicFiles[i].expiryTime)}</td>
+                  <td>{publicFiles[i].noOfDownload}</td>
                 </tr>
               );
             }
@@ -61,30 +61,30 @@ function PublicFiles(){
             var linearContent = [];
             for(let i=0;i<publicFiles.length;++i){
               linearContent.push(
-                <div key={"linear"+publicFiles[i].metadata.shortname}>
+                <div key={"linear"+publicFiles[i].shortname}>
                   <div className="container">
                       <div className="col-lg-4">
                           <div className="card card-margin">
                               <div className="card-header no-border">
-                                  <h5 className="card-title">{publicFiles[i].metadata.shortname}</h5>
+                                  <h5 className="card-title">{publicFiles[i].shortname}</h5>
                               </div>
                               <div className="card-body pt-0">
                                   <div className="widget-49">
                                       <div className="widget-49-title-wrapper">
                                           <div className="widget-49-date-primary">
-                                              { Math.round(((publicFiles[i].length/(1024*1024))*10))/10 === 0 ? 
-                                                  Math.round(((publicFiles[i].length/(1024*1024))*100))/100 === 0 ?
-                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].length)*10))/10}</span>
+                                              { Math.round(((publicFiles[i].size/(1024*1024))*10))/10 === 0 ? 
+                                                  Math.round(((publicFiles[i].size/(1024*1024))*100))/100 === 0 ?
+                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].size)*10))/10}</span>
                                                   <span className="widget-49-date-month">Byte</span></>) : 
-                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].length/(1024))*10))/10}</span>
+                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].size/(1024))*10))/10}</span>
                                                   <span className="widget-49-date-month">KB</span></>) :
-                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].length/(1024*1024))*10))/10}</span>
+                                                  (<><span className="widget-49-date-day">{Math.round(((publicFiles[i].size/(1024*1024))*10))/10}</span>
                                                   <span className="widget-49-date-month">MB</span></>) }
                                           </div>
                                           <div className="widget-49-meeting-info">
                                               <span className="widget-49-pro-title">{trimFileName(publicFiles[i].filename)}</span>
-                                              <span className="widget-49-meeting-time">{formattedTime(publicFiles[i].metadata.expiryTime)}</span>
-                                              <span className="widget-49-meeting-time">Download Left: {publicFiles[i].metadata.noOfDownload}</span>
+                                              <span className="widget-49-meeting-time">{formattedTime(publicFiles[i].expiryTime)}</span>
+                                              <span className="widget-49-meeting-time">Download Left: {publicFiles[i].noOfDownload}</span>
                                           </div>
                                       </div>
                                   </div>

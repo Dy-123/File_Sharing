@@ -45,22 +45,22 @@ function MyFiles(props){
             var tableContent = [];
             for(let i=0;i<privateFiles.length;++i){
               const params = new URLSearchParams();
-              params.append("fileId",privateFiles[i].metadata.shortname);
+              params.append("fileId",privateFiles[i].shortname);
               tableContent.push(
-                <tr key={privateFiles[i].metadata.shortname}>
-                  <td>{privateFiles[i].metadata.shortname}</td>
+                <tr key={privateFiles[i].shortname}>
+                  <td>{privateFiles[i].shortname}</td>
                   <td>{trimFileName(privateFiles[i].filename)}</td>
                   <td>
-                    { Math.round(((privateFiles[i].length/(1024*1024))*10))/10 === 0 ? 
-                    Math.round(((privateFiles[i].length/(1024*1024))*100))/100 === 0 ?
-                    `${Math.round(((privateFiles[i].length)*10))/10} B` : 
-                    `${Math.round(((privateFiles[i].length/(1024))*10))/10} KB` :
-                    `${Math.round(((privateFiles[i].length/(1024*1024))*10))/10} MB` }
+                    { Math.round(((privateFiles[i].size/(1024*1024))*10))/10 === 0 ? 
+                    Math.round(((privateFiles[i].size/(1024*1024))*100))/100 === 0 ?
+                    `${Math.round(((privateFiles[i].size)*10))/10} B` : 
+                    `${Math.round(((privateFiles[i].size/(1024))*10))/10} KB` :
+                    `${Math.round(((privateFiles[i].size/(1024*1024))*10))/10} MB` }
                   </td>
-                  <td>{formattedTime(privateFiles[i].metadata.expiryTime)}</td>
-                  <td>{privateFiles[i].metadata.noOfDownload}</td>
-                  <td>{privateFiles[i].metadata.isPublic===true ? 'Yes' : 'No'}</td>
-                  <td>{privateFiles[i].metadata.password==='' ? 'None' : privateFiles[i].metadata.password}</td>
+                  <td>{formattedTime(privateFiles[i].expiryTime)}</td>
+                  <td>{privateFiles[i].noOfDownload}</td>
+                  <td>{privateFiles[i].isPublic===true ? 'Yes' : 'No'}</td>
+                  <td>{privateFiles[i].password==='' ? 'None' : privateFiles[i].password}</td>
                   <td>
                     <button style={{border: 'none', background:'transparent'}} onClick={async () => {await fetch(process.env.REACT_APP_DELETE+`?${params.toString()}`,{credentials: 'include'}); setFileDeletedState(!fileDeletedState);}}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
@@ -77,37 +77,37 @@ function MyFiles(props){
             var linearContent = [];
             for(let i=0;i<privateFiles.length;++i){
               const params = new URLSearchParams();
-              params.append('fileId',privateFiles[i].metadata.shortname);
+              params.append('fileId',privateFiles[i].shortname);
               linearContent.push(
-              <div key={"linear"+privateFiles[i].metadata.shortname}>
+              <div key={"linear"+privateFiles[i].shortname}>
                 <div className="container">
                     <div className="col-lg-4">
                         <div className="card card-margin">
                             <div className="card-header no-border">
-                                <h5 className="card-title">{privateFiles[i].metadata.shortname}</h5>
+                                <h5 className="card-title">{privateFiles[i].shortname}</h5>
                             </div>
                             <div className="card-body pt-0">
                                 <div className="widget-49">
                                     <div className="widget-49-title-wrapper">
                                         <div className="widget-49-date-primary">
-                                            { Math.round(((privateFiles[i].length/(1024*1024))*10))/10 === 0 ? 
-                                                Math.round(((privateFiles[i].length/(1024*1024))*100))/100 === 0 ?
-                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].length)*10))/10}</span>
+                                            { Math.round(((privateFiles[i].size/(1024*1024))*10))/10 === 0 ? 
+                                                Math.round(((privateFiles[i].size/(1024*1024))*100))/100 === 0 ?
+                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].size)*10))/10}</span>
                                                 <span className="widget-49-date-month">Byte</span></>) : 
-                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].length/(1024))*10))/10}</span>
+                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].size/(1024))*10))/10}</span>
                                                 <span className="widget-49-date-month">KB</span></>) :
-                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].length/(1024*1024))*10))/10}</span>
+                                                (<><span className="widget-49-date-day">{Math.round(((privateFiles[i].size/(1024*1024))*10))/10}</span>
                                                 <span className="widget-49-date-month">MB</span></>) }
                                         </div>
                                         <div className="widget-49-meeting-info">
                                             <span className="widget-49-pro-title">{trimFileName(privateFiles[i].filename)}</span>
-                                            <span className="widget-49-meeting-time">{formattedTime(privateFiles[i].metadata.expiryTime)}</span>
+                                            <span className="widget-49-meeting-time">{formattedTime(privateFiles[i].expiryTime)}</span>
                                         </div>
                                     </div>
                                     <ul className="widget-49-meeting-points">
-                                        <li className="widget-49-meeting-item"><span>Download Left: {privateFiles[i].metadata.noOfDownload}</span></li>
-                                        <li className="widget-49-meeting-item"><span>Public File: {privateFiles[i].metadata.isPublic===true ? 'Yes' : 'No'}</span></li>
-                                        <li className="widget-49-meeting-item"><span>Password: {privateFiles[i].metadata.password==='' ? 'None' : privateFiles[i].metadata.password}</span></li>
+                                        <li className="widget-49-meeting-item"><span>Download Left: {privateFiles[i].noOfDownload}</span></li>
+                                        <li className="widget-49-meeting-item"><span>Public File: {privateFiles[i].isPublic===true ? 'Yes' : 'No'}</span></li>
+                                        <li className="widget-49-meeting-item"><span>Password: {privateFiles[i].password==='' ? 'None' : privateFiles[i].password}</span></li>
                                     </ul>
                                     <div className="widget-49-meeting-action">
                                         <button style={{border: 'none', background:'transparent'}} onClick={async () => {await fetch(process.env.REACT_APP_DELETE+`?${params.toString()}`,{credentials: 'include'}); setFileDeletedState(!fileDeletedState);}}>
