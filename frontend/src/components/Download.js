@@ -55,8 +55,6 @@ function Download(){
         setIsDetailAvailable(true);
       }
 
-      console.log(fileArray);
-
       setText("Download has been started. Downloading...");
       setDownloadButtonDisabled(true);
 
@@ -73,7 +71,7 @@ function Download(){
       .then((response) => {
 
         if(response.status===401){
-          throw Error("File is password protected. Enter a correct file password to download it.");
+          throw Error("Wrong password / password protected.");
         }else if (!response.ok) {
           throw Error("File not found");
         }
@@ -126,7 +124,7 @@ function Download(){
         })
         .catch(error => {
           // Handle any errors that occurred during the download
-          setText('Error downloading file:\t' + error);
+          setText('Error downloading file. \t' + error);
           setDownloadButtonDisabled(false);
           setIsDetailAvailable(false);
         });

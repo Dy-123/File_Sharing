@@ -140,10 +140,6 @@ function Login(props){
 
                         {sentOtpDisable===true ? (<></>) :
                         (<>
-
-                            {/* <label style={{'marginLeft':'6px'}}>OTP</label>
-                            <input style={{'marginLeft':'7px', 'width':'152px'}} type="number" onChange={(e) => setOtp(e.target.value)}></input> */}
-
                             <div className="input-container">
                                 <div className="did-floating-label-content">
                                     <input className="did-floating-input" style={{minWidth:"250px"}} placeholder=" " type="number" onChange={(e) => setOtp(e.target.value)}></input>
