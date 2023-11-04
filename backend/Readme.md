@@ -14,7 +14,8 @@ JWT_PRIVATE_KEY=
 ##### string which will be used for as a private key for signing jwt token
 -------------------------------------------------------------------------------------------
 FRONTEND_URL=         
-
+PORT_NO=        
+     
 -------------------------------------------------------------------------------------------
 AWS_ACCESS_KEY=       
 AWS_SECRET_ACCESS_KEY=          
