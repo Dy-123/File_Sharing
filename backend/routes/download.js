@@ -38,7 +38,6 @@ router.post('/',upDown.none(), async (req, res) => {
           // // However, it's important to note that not all stream-related operations can be directly awaited because streams are inherently asynchronous and do not return Promises.
           downloadStream.on('error', (err) => {
             console.error("Error during download stream:", err);
-            res.status(500).send("Error while streaming the file");
           });
 
           downloadStream.pipe(res);
