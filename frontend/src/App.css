@@ -49,6 +49,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 10px;
 }
 
 .uploadOptions {
@@ -163,6 +164,7 @@
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.6);
+  z-index: 10000;
 }
 
 .loginErrTxt {
@@ -425,4 +427,57 @@ input[type=number]::-webkit-outer-spin-button {
 
 .widget-49 .widget-49-meeting-action a {
   text-transform: uppercase;
+}
+
+.login-signup-card{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.login-signup-card button{
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 15px;
+}
+
+.input-container .did-floating-label-content{
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.login-signup-card .input-container button{
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.file-info-display-box {
+  /* border: none; */
+  background-color: white;
+  border-radius: 7px;
+  border: 1px solid #3D85D8;
+  width: 240px;
+  text-align: left; 
+  position: relative;
+  margin-top: 5px;
+  cursor: default;
+}
+
+.file-info-key {
+  font-size: 8px;
+  margin-left: 10px;
+}
+
+.file-info-value {
+  margin-top: 2px;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.empty-directory{
+  text-align: center;
+  position: fixed;
+  left: 0;
+  right: 0;
+  margin-top: 10px;
 }

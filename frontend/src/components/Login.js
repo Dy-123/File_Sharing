@@ -9,6 +9,11 @@ function Login(props){
     const [sentOtpDisable,setSentOtpDiable] = useState(true);
     const [msg,setMsg] = useState("");
 
+    const emailChange = (e) => {
+        setMail(e.target.value);
+        setSentOtpDiable(true);
+    }
+
     const sendOtpEvent = async () => {
 
         const params = new URLSearchParams();
@@ -101,43 +106,72 @@ function Login(props){
                 </div>
 
                 {loginState === true ?  
-                (<div>
-                    <div>
-                        <label style={{marginLeft:"11px"}}>E-mail</label>
-                        <input style={{'marginLeft':'43px'}} type="email" onChange={(e) => setMail(e.target.value)}></input>
-                    </div>
-                    <div>
-                        <label style={{marginLeft:"11px"}} >Password</label>
-                        <input style={{'marginLeft':'21px'}} type="password" onChange={(e) => setPassword(e.target.value)}></input>
-                    </div>
-                    <button style={{'marginLeft':'121px','marginTop':'10px', marginBottom:'5px'}} type="button" className="btn btn-primary" onClick={loginEvent}>Login</button>
-                </div>) : 
-                (<div>
-                    <div>
-                        <label style={{marginLeft:"11px"}}>E-mail</label>
-                        <input style={{'marginLeft':'44px'}} type="email" onChange={(e) => setMail(e.target.value)}></input>
+                (<div className="login-signup-card">
+
+                    <div className="input-container">
+                        <div className="did-floating-label-content">
+                            <input className="did-floating-input" style={{minWidth:"250px"}} type="email" placeholder=" " onChange={emailChange}></input>
+                            <label className="did-floating-label">E-mail</label>
+                        </div>
                     </div>
 
-                    <div>
-                        <button style={{'width':'85px', 'textAlign':'left', marginLeft:"10px"}} type="button" className="btn-primary" onClick={sendOtpEvent}>Send OTP</button>
-                    
+                    <div className="input-container">
+                        <div className="did-floating-label-content">
+                            <input className="did-floating-input" style={{minWidth:"250px"}} placeholder=" " type="password" onChange={(e) => setPassword(e.target.value)}></input>
+                            <label className="did-floating-label">Password</label>
+                        </div>
+                    </div>
+
+                    <button type="button" className="btn btn-primary" onClick={loginEvent}>Login</button>
+                </div>) : 
+                (<div className="login-signup-card">
+
+                    <div className="input-container">
+                        <div className="did-floating-label-content">
+                            <input className="did-floating-input" style={{minWidth:"250px"}} type="email" placeholder=" " onChange={emailChange}></input>
+                            <label className="did-floating-label">E-mail</label>
+                        </div>
+                    </div>
+
+                    <div className="input-container">
+                        {!sentOtpDisable===true ? <></> :
+                            <button class="btn btn-outline-secondary" type="button" onClick={sendOtpEvent}>Send OTP</button>
+                        }
+
                         {sentOtpDisable===true ? (<></>) :
                         (<>
-                            <label style={{'marginLeft':'6px'}}>OTP</label>
-                            <input style={{'marginLeft':'7px', 'width':'152px'}} type="number" onChange={(e) => setOtp(e.target.value)}></input>
+
+                            {/* <label style={{'marginLeft':'6px'}}>OTP</label>
+                            <input style={{'marginLeft':'7px', 'width':'152px'}} type="number" onChange={(e) => setOtp(e.target.value)}></input> */}
+
+                            <div className="input-container">
+                                <div className="did-floating-label-content">
+                                    <input className="did-floating-input" style={{minWidth:"250px"}} placeholder=" " type="number" onChange={(e) => setOtp(e.target.value)}></input>
+                                    <label className="did-floating-label">OTP</label>
+                                </div>
+                            </div>
                         </>)}
+
                     </div>
 
-                    <div>
-                        <label style={{marginLeft:"11px"}}>Password</label>
-                        <input style={{'marginLeft':'23px'}} type="password" onChange={(e) => setPassword(e.target.value)}></input>
+                    <div className="input-container">
+                        <div className="did-floating-label-content">
+                            <input className="did-floating-input" style={{minWidth:"250px"}} placeholder=" " type="password" onChange={(e) => setPassword(e.target.value)}></input>
+                            <label className="did-floating-label">Password</label>
+                        </div>
                     </div>
-                    <div>
-                        <label style={{marginLeft:"11px"}}>Match Pass</label>
-                        <input style={{'marginLeft':'10px'}} type="password" onChange={(e) => setMatchPassword(e.target.value)}></input>
+
+                    <div className="input-container">
+                        <div className="did-floating-label-content">
+                            <input className="did-floating-input" style={{minWidth:"250px"}} placeholder=" " type="password" onChange={(e) => setMatchPassword(e.target.value)}></input>
+                            <label className="did-floating-label">Confirm Password</label>
+                        </div>
                     </div>
-                    <button style={{'marginLeft':'82px','marginTop':'10px', marginBottom:'5px'}} type="button" className="btn btn-primary" onClick={resetSignupEvent}>Sign Up / Reset</button>
+
+
+                    <button type="button" className="btn btn-primary" onClick={resetSignupEvent}>Signup / Reset</button>
                 </div>)}
+
                 <div>
                     <p className="loginErrTxt">{msg}</p>
                 </div>

@@ -1,4 +1,6 @@
 import { useState, useRef } from "react";
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 function Upload(){
 
@@ -11,6 +13,10 @@ function Upload(){
     const [downloadCount,setDownloadCount] = useState(1);
     const [expDate, setExpDate] = useState(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16));
     const [passwordValue,setPasswordValue] = useState("");
+    const [uploadPercentage,setUploadPercentage] = useState(0);
+    const [uploadStarted,setUploadStarted] = useState(false);
+    const [uploadText,setUploadText] = useState("");
+    const [isUplaoded,setIsUploaded] = useState(false);
 
     const fileSelectEvent = (event) => {
         setFile(event.target.files[0]);
@@ -40,6 +46,7 @@ function Upload(){
         formData.append("fileUpload", file);
 
         setText("File is being uploaded...");
+        setUploadStarted(true);
 
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = true;                        // XMLHttpRequest will include credentials like cookies in the request headers when sending the request to the server
@@ -49,23 +56,28 @@ function Upload(){
           let percent = Math.round((event.loaded / event.total)*100);
           let loaded = Math.round( event.loaded/(1024*1024) );
           let total = Math.round( event.total/(1024*1024) );
-          setText("Uploaded "+loaded+"MB out of "+total+"MB. Upload progress is: "+percent+" percent. Uploading...");
+          setUploadPercentage(percent);
+          setUploadText("Uploaded: "+loaded+"MB / "+total+"MB");
+          setText("Uploading...");
           // console.log(percent);
         };
 
         // handle error
         xhr.upload.onerror = function () {
-          setText("Error uploading file:"+xhr.status);
+          setText("Error uploading file: "+xhr.status);
           setDisabled(false);
+          setUploadStarted(false);
         };
 
         // listen for response which will give the link
         xhr.onreadystatechange = function () {
           if (xhr.readyState === XMLHttpRequest.DONE) {
-            setText("File has been uploaded successfully! File id is: \""+xhr.responseText+"\"");
+            setText("Uploaded! File id is: \""+xhr.responseText+"\"");
             setDisabled(false);
             setCopyText(xhr.responseText);
             setButtonVisible(true);
+            setUploadStarted(false);
+            setIsUploaded(true);
           }
         };
 
@@ -77,8 +89,10 @@ function Upload(){
     };
 
     const privacyToggleButton = () => {
-      setPrivacy(prevState => !prevState);
-      setPasswordValue("");
+      if(!isUplaoded){
+        setPrivacy(prevState => !prevState);
+        setPasswordValue("");
+      }
     };
 
     const countDownloadEvent = (event) => {
@@ -114,6 +128,9 @@ function Upload(){
 
     const removeFile = () => {
         setFile("null");
+        setIsUploaded(false);
+        setButtonVisible(false);
+        setText("Select a file, set no of copy and time till which it can be downladed.");
     }
 
 
@@ -136,46 +153,56 @@ function Upload(){
             (<div className="fileUploadOptions">
               <img src="file.png" alt="fileIcon" id="fileImage" />
               <p id="fileName">{trimFileName(file)}</p>
-              <img src="xmark.png" alt="closeIcon" id="xmarkImage" onClick={removeFile} />
+              <img src="xmark.png" alt="closeIcon" id="xmarkImage" onClick={removeFile} style={{"visibility":`${uploadStarted===true ? 'hidden' : 'visible'}`}}/>
             </div>)
           }
 
-            <div className="uploadOptions" style={{"paddingLeft":"15px"}} >
-
-              <label style={{"marginRight":"5px"}}>Private</label>
-              <div
-                className={`toggle ${privacy ? 'on' : 'off'}`}
-                onClick={privacyToggleButton}>
+          { uploadStarted === false ?
+            <>
+              <div className="uploadOptions" style={{"paddingLeft":"15px"}} >
+                <label style={{"marginRight":"5px"}}>Private</label>
+                <div
+                  className={`toggle ${privacy ? 'on' : 'off'}`}
+                  onClick={privacyToggleButton}>
+                </div>
+                <label style={{"marginRight":"25px","marginLeft":"5px" }}>Public</label>
               </div>
-              <label style={{"marginRight":"25px","marginLeft":"5px" }}>Public</label>
-            </div>
 
-            <div className="input-container">
-              <div className="did-floating-label-content">
-                <input className="did-floating-input" style={{minWidth:"250px"}} type="number" placeholder=" " onChange={countDownloadEvent} value={downloadCount}></input>
-                <label className="did-floating-label">Download Count</label>
+              <div className="input-container">
+                <div className="did-floating-label-content">
+                  <input className="did-floating-input" disabled={isUplaoded} style={{minWidth:"250px"}} type="number" placeholder=" " onChange={countDownloadEvent} value={downloadCount}></input>
+                  <label className="did-floating-label">Download Count</label>
+                </div>
               </div>
-            </div>
 
-            <div className="input-container">
-              <div className="did-floating-label-content">
-                <input className="did-floating-input" style={{minWidth:"250px"}} type="datetime-local" placeholder=" " onChange={expiryDateEvent} value={expDate}></input>
-                <label className="did-floating-label">File Expiry Time</label>
+              <div className="input-container">
+                <div className="did-floating-label-content">
+                  <input className="did-floating-input" disabled={isUplaoded} style={{minWidth:"250px"}} type="datetime-local" placeholder=" " onChange={expiryDateEvent} value={expDate}></input>
+                  <label className="did-floating-label">File Expiry Time</label>
+                </div>
               </div>
-            </div>
 
-            <div className="input-container">
-              <div className="did-floating-label-content">
-                <input className="did-floating-input" style={{minWidth:"250px"}} disabled={privacy} type="password" placeholder=" " onChange={passwordInputEvent} value={passwordValue}></input>
-                <label className="did-floating-label">File Password</label>
+              <div className="input-container">
+                <div className="did-floating-label-content">
+                  <input className="did-floating-input" style={{minWidth:"250px"}} disabled={privacy ||isUplaoded} type="password" placeholder=" " onChange={passwordInputEvent} value={passwordValue}></input>
+                  <label className="did-floating-label">File Password</label>
+                </div>
               </div>
-            </div>
+            </> :  
+            <>
+              <div style={{"marginBottom":"15px"}}>{uploadText}</div>
+              <div style={{"width":"150px","height":"150px", "marginBottom":"20px"}}>
+                <CircularProgressbar value={uploadPercentage} text={`${uploadPercentage}%`} styles={buildStyles({textSize:'20px'})}/>
+              </div>
+            </>}
+            
+            { isButtonVisible &&
+              <div className="hiddenButton">
+                <button className="btn btn-primary" onClick={() => {navigator.clipboard.writeText(copyText)} }>Click to copy file id</button>
+              </div>
+            }
 
-            <div className="hiddenButton">
-              {isButtonVisible && <button className="btn btn-primary" onClick={() => {navigator.clipboard.writeText(copyText)} }>Click to copy file id</button>}
-            </div>
-
-            <button className="btn btn-primary" disabled={disabled} onClick={uploadEvent}>Upload</button>
+            {!isUplaoded && <button className="btn btn-primary" style={{"marginTop":"5px"}} disabled={disabled} onClick={uploadEvent}>Upload</button>}
 
         </div>
 

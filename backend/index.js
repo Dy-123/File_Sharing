@@ -96,17 +96,22 @@ const upload = multer({
   storage: multerS3({
     s3: s3,
     bucket: 'file-sharing-files',
-    metadata: function (req, file, cb) {
-      console.log(req.body.expiryTime);
-      cb(null,{expiry: req.body.expiryTime});
-    }
+    // // can use aws s3 lifecycle leverage to automatically 
+    // // delete file on time expiry: haven't setup in this, 
+    // // in this manually delete when needed
+    // metadata: function (req, file, cb) {
+    //   // console.log(req.body.expiryTime);
+    //   cb(null,{expiry: req.body.expiryTime});
+    // }
   }),
 }).single("fileUpload");
 
 app.post('/upload',(req,res)=>{
+    console.log("File upload started");
     upload(req, res, async (error) => {
       if(error){
         console.log(req.body.expiryTime);
+        console.log("Error while uploading file");
         res.send("Error while uploading file");
       }else{
 
@@ -117,15 +122,15 @@ app.post('/upload',(req,res)=>{
             const payload=jwt.verify(token,process.env.JWT_PRIVATE_KEY);
             uploadedBy = payload.userId;
           }catch(err){
-            console.log('catch block executed');
+            console.log('Upload catch block executed');
           }
         }
 
         // console.log(req);
-
+        
         const newFileDetails = new fileDetails({
           filename: req.file.originalname,
-          size: req.file.size,
+          size: req.headers['content-length'],
           shortname: await hashName(),
           expiryTime: new Date(req.body.expiryTime),
           noOfDownload: parseInt(req.body.noOfDownload),
@@ -140,9 +145,11 @@ app.post('/upload',(req,res)=>{
   
         try {
           await newFileDetails.save();
-          res.send('File uploaded successfully! File id: '+ newFileDetails.shortname);
+          console.log('File uploaded successfully! File id: '+ newFileDetails.shortname);
+          res.send(newFileDetails.shortname);
         } catch (err) {
           console.error(err);
+          console.log('Error while saving info in db');
           res.status(500).send('Error while saving uploaded file');
         }
       }
@@ -152,7 +159,7 @@ app.post('/upload',(req,res)=>{
 // using multer to parse the form data
 const upDown = multer();
 app.post('/download',upDown.none(), async (req, res) => {
-
+    console.log("File downloaded started");
     try{
       const file =  await fileDetails.find({ 'shortname' : req.body.filename });
 
@@ -205,10 +212,35 @@ app.post('/download',upDown.none(), async (req, res) => {
         }
       }
     }catch(err){
+      console.log("error while downloading: ", err);
       res.status(500).send(err.message);
     }
 
  });
+
+app.get("/fileDetail", async (req,res) => {
+  const fileID = req.query.ID;
+  const passwordValue = req.query.pass;
+  try{
+    const file =  await fileDetails.find({ 'shortname' : fileID });
+    if (file.length===0) {
+      // console.log('No files found');
+      res.status(404).send("File not found");
+    } else {
+      if(file[0].password!='' && file[0].password!=passwordValue){
+        res.status(401).send("File is password protected.");
+      }else{
+        // delete not working need to be modified in whole code
+        delete file[0]._id;
+        delete file[0].awsBucket;
+        delete file[0].awsBuckeyFileKey;
+        res.status(200).send(file[0]);
+      }
+    }
+  }catch(err){
+    res.status(500).send(err.message);
+  }
+});
 
 app.get("/publicFiles", async (req,res) => {
 

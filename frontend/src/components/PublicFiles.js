@@ -123,12 +123,12 @@ function PublicFiles(){
                         <td style={{"width":"15%"}}>Download Left</td>
                       </tr>
                     </thead>
-                    <tbody>{tableContent}</tbody>
+                    { tableContent.length===0 ? <p className="empty-directory">Public directory is empty.</p> : <tbody>{tableContent}</tbody>}
                   </table>
                 </div>
                 :
                 <div>
-                  {linearContent}
+                  { linearContent.length===0 ? <p className="empty-directory">Public directory is empty.</p> : {linearContent}}
                 </div>
               }
               </div>

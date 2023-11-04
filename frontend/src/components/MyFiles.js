@@ -174,13 +174,13 @@ function MyFiles(props){
                               <td></td>
                             </tr>
                           </thead>
-                          <tbody>{tableContent}</tbody>
+                          { tableContent.length===0 ? <p className="empty-directory">Personal directory is empty.</p> : <tbody>{tableContent}</tbody>}
                         </table>
                       </div>)
                     :
                     (
                       <div>
-                        {linearContent}
+                        { linearContent.length===0 ? <p className="empty-directory">Personal directory is empty.</p> : {linearContent}}
                       </div>
                     )
                   }
@@ -188,7 +188,7 @@ function MyFiles(props){
               ) 
             }
           </div> ) :
-          (<div className="privateFiles" style={{"display":"flex"}}><p>Log in to view your files.</p></div>)
+          (<div className="files" style={{"display":"flex"}}><p>Log in to view your files.</p></div>)
         }        
       </div>
     );

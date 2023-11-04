@@ -1,88 +1,135 @@
 import {useState} from "react";
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 function Download(){
     const [file,setFile] = useState(null);
     const [text,setText] = useState("Enter file id to download the file");
-    const [disabled,setDisabled] = useState(false); 
+    const [downloadButtonDisabled,setDownloadButtonDisabled] = useState(false); 
     const [passwordProtection, setPasswordProtection] = useState(false);
     const [passwordValue,setPasswordValue] = useState("");
+    const [fileDetail,setFileDetail] = useState([]);
+    const [isDetailAvailable,setIsDetailAvailable]= useState(false);
+    const [downloadedPercentage,setDownloadedPercentage] = useState(0);
+    const [downloadText,setDownloadText] = useState("Download starting...");
+
+    const formattedTime = (time) => {
+
+      const timestamp = new Date(time);
+      
+      const hours = timestamp.getHours();
+      const formattedHours = (hours % 12 || 12).toString().padStart(2, '0');
+      const minutes = timestamp.getMinutes();
+      const formattedMinutes = minutes.toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+  
+      const day = timestamp.getDate();
+      const month = timestamp.toLocaleString('default', { month: 'short' });
+      const year = timestamp.getFullYear().toString().slice(-2);
+      
+      return `${day} ${month} ${year} ${formattedHours}:${formattedMinutes} ${ampm}`;
+  
+    }
+
+    const trimFileName = (filename) => {
+      if(typeof filename === 'string' && filename.length>34){
+        return filename.slice(0, 17) + '...' + filename.slice(filename.length-17,filename.length) + '';
+      }
+      return filename;
+    }
 
     const changeEvent = (event) =>{
         setFile(event.target.value);
     }
+    
+    const downloadFile = async (url,fileName) => {
 
-    function downloadFile(url,fileName) {
+      const fileDetailUrl = `${process.env.REACT_APP_FILE_DETAIL}?ID=${fileName}&pass=${passwordValue}`;
+      console.log(fileDetailUrl);
+      const response = await fetch(fileDetailUrl);
 
-        setText("Download has been started. Downloading...");
-        setDisabled(true);
+      if(response.status===200){
+        const file = await response.json();
+        var fileArray = [file.filename,file.size,file.shortname,file.expiryTime,file.noOfDownload]
+        setFileDetail(fileArray);
+        setIsDetailAvailable(true);
+      }
 
-        var form = new FormData();
-        form.append("filename",fileName);
-        form.append("password",passwordValue);
+      console.log(fileArray);
 
-        var originalName;
+      setText("Download has been started. Downloading...");
+      setDownloadButtonDisabled(true);
 
-        fetch(url,{
-          method: 'POST',
-          body: form
-        })
-        .then(response => {
+      var form = new FormData();
+      form.append("filename",fileName);
+      form.append("password",passwordValue);
 
-          if(response.status===401){
-            throw Error("File is password protected. Enter a correct file password to download it.");
-          }else if (!response.ok) {
-            throw Error("File not found");
-          }
+      var originalName;
 
-          const contentLength = response.headers.get("content-disposition");
-          originalName = contentLength.substring(22,contentLength.length-1);
+      fetch(url,{
+        method: 'POST',
+        body: form
+      })
+      .then((response) => {
 
-          let loaded = 0;
-          const chunks = [];
-      
-          const reader = response.body.getReader();
-      
-          function read() {
-            return reader.read().then(({ done, value }) => {
-              if (done) {
-                return chunks;
-              }
-              
-              loaded += value.length;
-              // const progress = (loaded / total) * 100;
-      
-              // Update the progress here, e.g., update a progress bar
-              setText((loaded/(1024*1024)).toFixed(2) + " MB of file: " + fileName + " has been downloaded. Downloading...");
-              // console.log(loaded/(1024*1024) + " MB of file: " + fileName + " has been downloaded.");
-      
-              chunks.push(value);
-              return read();
-            });
-          }
-      
-          return read();
+        if(response.status===401){
+          throw Error("File is password protected. Enter a correct file password to download it.");
+        }else if (!response.ok) {
+          throw Error("File not found");
+        }
 
-          })
-          .then(chunks => {
-            const blob = new Blob(chunks);
-            const url = URL.createObjectURL(blob);
-        
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = originalName;
-            a.click();
-        
-            URL.revokeObjectURL(url);
-          })
-          .then(() => {
-            setText('File downloaded successfully!');
-            setDisabled(false);
-          })
-          .catch(error => {
-            // Handle any errors that occurred during the download
-            setText('Error downloading file:\t' + error);
-            setDisabled(false);
+        const contentLength = response.headers.get("content-disposition");
+        originalName = contentLength.substring(22,contentLength.length-1);
+
+        let loaded = 0;
+        const chunks = [];
+    
+        const reader = response.body.getReader();
+    
+        function read() {
+          return reader.read().then(({ done, value }) => {
+            if (done) {
+              return chunks;
+            }
+            
+            loaded += value.length;
+            const progress = ( loaded / fileArray[1] ) * 100;
+
+            setDownloadedPercentage(progress.toFixed(0));
+            // Update the progress here, e.g., update a progress bar
+            setDownloadText("Downloaded: "+(loaded/(1024*1024)).toFixed(0)+ "MB / " + (fileArray[1]/(1024*1024)).toFixed(0) + "MB");
+            setText("Downloading...");
+    
+            chunks.push(value);
+            return read();
           });
+        }
+    
+        return read();
+
+        })
+        .then(chunks => {
+          const blob = new Blob(chunks);
+          const url = URL.createObjectURL(blob);
+      
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = originalName;
+          a.click();
+      
+          URL.revokeObjectURL(url);
+        })
+        .then(() => {
+          setText('File downloaded successfully!');
+          setDownloadButtonDisabled(false);
+          setIsDetailAvailable(false);
+        })
+        .catch(error => {
+          // Handle any errors that occurred during the download
+          setText('Error downloading file:\t' + error);
+          setDownloadButtonDisabled(false);
+          setIsDetailAvailable(false);
+        });
           
       }
 
@@ -102,30 +149,52 @@ function Download(){
     return(
       <>
         <div className="uploadCard">
-
-            <div className="input-container" style={{"marginTop":"1rem"}}>
-              <div className="did-floating-label-content">
-                <input className="did-floating-input" type="text" placeholder=" " onChange={changeEvent}></input>
-                <label className="did-floating-label">File ID</label>
+          {isDetailAvailable===false ?
+            <>
+              <div className="input-container" style={{"marginTop":"1rem"}}>
+                <div className="did-floating-label-content">
+                  <input className="did-floating-input" type="text" placeholder=" " onChange={changeEvent}></input>
+                  <label className="did-floating-label">File ID</label>
+                </div>
               </div>
-            </div>
 
-            <div className="downloadOptions" style={{"marginBottom":"1rem"}}>
-              <label style={{"marginRight":"3px"}} >Password Protected</label>
-              <div
-                className={`toggle ${passwordProtection ? 'on' : 'off'}`}
-                onClick={passwordToggleButton}>
+              <div className="downloadOptions" style={{"marginBottom":"0.8rem","marginTop":"0.8rem"}}>
+                <label style={{"marginRight":"3px"}} >Password Protected</label>
+                <div
+                  className={`toggle ${passwordProtection ? 'on' : 'off'}`}
+                  onClick={passwordToggleButton}>
+                </div>
               </div>
-            </div>
 
-            <div className="input-container">
-              <div className="did-floating-label-content">
-                <input className="did-floating-input" type="password" placeholder=" " onChange={passwordInputEvent} value={passwordValue} disabled={!passwordProtection}></input>
-                <label className="did-floating-label">File Password</label>
+              <div className="input-container">
+                <div className="did-floating-label-content">
+                  <input className="did-floating-input" type="password" placeholder=" " onChange={passwordInputEvent} value={passwordValue} disabled={!passwordProtection}></input>
+                  <label className="did-floating-label">File Password</label>
+                </div>
               </div>
-            </div>
+            </> :
+            <>
+              <div style={{"marginBottom":"15px"}}>{downloadText}</div>
+              <div style={{"width":"100px","height":"100px","marginBottom":"10px"}}>
+                <CircularProgressbar value={downloadedPercentage} text={`${downloadedPercentage}%`} styles={buildStyles({textSize:'20px'})}/>
+              </div>
+              <div className="download-file-info">
+                <div className="file-info-display-box">
+                  <div className="file-info-key">File Name</div>
+                  <div className="file-info-value">{trimFileName(fileDetail[0])}</div>
+                </div>
+                <div className="file-info-display-box">
+                  <div className="file-info-key">File Expiry Time</div>
+                  <div className="file-info-value">{formattedTime(fileDetail[3])}</div>
+                </div>
+                <div className="file-info-display-box">
+                  <div className="file-info-key">Download Left</div>
+                  <div className="file-info-value">{fileDetail[4]}</div>
+                </div>
+              </div>
+            </>}
 
-            <button className="btn btn-primary" disabled={disabled} onClick={downloadEvent}>Download</button>
+            <button className="btn btn-primary" style={{"marginTop":"10px"}} disabled={downloadButtonDisabled} onClick={downloadEvent}>Download</button>
         </div>
 
           <div>
