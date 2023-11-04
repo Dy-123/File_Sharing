@@ -22,7 +22,7 @@ Signup
 ![signup](https://github.com/Dy-123/File_Sharing/assets/54953527/57f4be29-a870-4a50-98cd-d5609525197b)
 
 OTP Mail
-![ss5](https://github.com/Dy-123/File_Sharing/assets/54953527/994b4766-eb42-4320-8162-9fab3ca9b387)
+![otp](https://github.com/Dy-123/File_Sharing/assets/54953527/496cfdf2-f093-4fff-aef2-6aba5226de79)
 
 My Files : Large Screen(screen width>700px)
 ![myFiles](https://github.com/Dy-123/File_Sharing/assets/54953527/bb4a82d0-a9a3-4cea-b391-7b2a9a2e3401)
