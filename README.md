@@ -30,5 +30,5 @@ My Files : Large Screen(screen width>700px)
 Public Files : Large Screen(screen width>700px)
 ![publicFiles](https://github.com/Dy-123/File_Sharing/assets/54953527/6280c2e1-ddca-4fa1-8f8a-9fb2b670ff7a)
 
-My Files / Public Files : Small Screen(screen width<=700px)
+My Files / Public Files : Small Screen(screen width<=700px)       
 ![mobileScreen](https://github.com/Dy-123/File_Sharing/assets/54953527/31803778-558d-476c-bf0a-f971e4b943c7)
