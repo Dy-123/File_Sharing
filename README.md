@@ -6,7 +6,8 @@ Frontend: Reactjs, HTML, CSS
 Backend: Nodejs, Expressjs    
 Database: Mongodb, aws-s3   
 
-Screenshots:
+### GIF's and Screenshot    
+Wait for a few moments to let it load.
 
 File Upload
 ![upload](https://github.com/Dy-123/File_Sharing/assets/54953527/51f740f1-4613-4a21-9845-95a14b27b0b1)
