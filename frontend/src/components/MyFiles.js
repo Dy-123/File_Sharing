@@ -179,9 +179,9 @@ function MyFiles(props){
                       </div>)
                     :
                     (
-                      <div>
-                        { linearContent.length===0 ? <p className="empty-directory">Personal directory is empty.</p> : {linearContent}}
-                      </div>
+                    <>
+                      { linearContent.length===0 ? <p className="empty-directory">Personal directory is empty.</p> : <div>{linearContent}</div>}
+                    </>
                     )
                   }
                 </div>

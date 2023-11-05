@@ -1,22 +1,36 @@
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-function Upload(){
-
-    const [file,setFile] = useState("null");
-    const [text,setText] = useState("Select a file, set no of copy and time till which it can be downladed.");
-    const [disabled,setDisabled] = useState(false);
-    const [isButtonVisible, setButtonVisible] = useState(false);
-    const [copyText,setCopyText] = useState("");
-    const [privacy, setPrivacy] = useState(false);
-    const [downloadCount,setDownloadCount] = useState(1);
-    const [expDate, setExpDate] = useState(new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16));
-    const [passwordValue,setPasswordValue] = useState("");
-    const [uploadPercentage,setUploadPercentage] = useState(0);
-    const [uploadStarted,setUploadStarted] = useState(false);
-    const [uploadText,setUploadText] = useState("");
-    const [isUplaoded,setIsUploaded] = useState(false);
+function Upload(props){
+  
+    const file = props.fileUpload;
+    const setFile = props.setFileUpload;
+    const text = props.textUpload;
+    const setText = props.setTextUpload;
+    const disabled = props.disabledUpload;
+    const setDisabled = props.setDisabledUpload;
+    const isButtonVisible = props.isButtonVisibleUpload;
+    const setButtonVisible = props.setButtonVisibleUpload;
+    const copyText = props.copyTextUpload;
+    const setCopyText = props.setCopyTextUpload;
+    const privacy = props.privacyUpload;
+    const setPrivacy = props.setPrivacyUpload;
+    const downloadCount = props.downloadCountUpload;
+    const setDownloadCount = props.setDownloadCountUpload;
+    const expDate = props.expDateUpload;
+    const setExpDate = props.setExpDateUpload;
+    const passwordValue = props.passwordValueUpload;
+    const setPasswordValue = props.setPasswordValueUpload;
+    const uploadPercentage = props.uploadPercentageUpload;
+    const setUploadPercentage = props.setUploadPercentageUpload;
+    const uploadStarted = props.uploadStartedUpload;
+    const setUploadStarted = props.setUploadStartedUpload;
+    const uploadText = props.uploadTextUpload;
+    const setUploadText = props.setUploadTextUpload;
+    const isUplaoded = props.isUplaodedUpload;
+    const setIsUploaded = props.setIsUploadedUpload;
+    
 
     const fileSelectEvent = (event) => {
         setFile(event.target.files[0]);

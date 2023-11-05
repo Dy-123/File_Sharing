@@ -1,17 +1,26 @@
-import {useState} from "react";
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 
-function Download(){
-    const [file,setFile] = useState(null);
-    const [text,setText] = useState("Enter file id to download the file");
-    const [downloadButtonDisabled,setDownloadButtonDisabled] = useState(false); 
-    const [passwordProtection, setPasswordProtection] = useState(false);
-    const [passwordValue,setPasswordValue] = useState("");
-    const [fileDetail,setFileDetail] = useState([]);
-    const [isDetailAvailable,setIsDetailAvailable]= useState(false);
-    const [downloadedPercentage,setDownloadedPercentage] = useState(0);
-    const [downloadText,setDownloadText] = useState("Download starting...");
+function Download(props){
+
+    const file = props.fileDownload;
+    const setFile = props.setFileDownload;
+    const text = props.textDownload;
+    const setText = props.setTextDownload;
+    const downloadButtonDisabled = props.downloadButtonDisabledDownload;
+    const setDownloadButtonDisabled = props.setDownloadButtonDisabledDownload;
+    const passwordProtection = props.passwordProtectionDownload;
+    const setPasswordProtection = props.setPasswordProtectionDownload;
+    const passwordValue = props.passwordValueDownload;
+    const setPasswordValue = props.setPasswordValueDownload;
+    const fileDetail = props.fileDetailDownload;
+    const setFileDetail = props.setFileDetailDownload;
+    const isDetailAvailable = props.isDetailAvailableDownload;
+    const setIsDetailAvailable = props.setIsDetailAvailableDownload;
+    const downloadedPercentage = props.downloadedPercentageDownload;
+    const setDownloadedPercentage = props.setDownloadedPercentageDownload;
+    const downloadText = props.downloadTextDownload;
+    const setDownloadText = props.setDownloadTextDownload;  
 
     const formattedTime = (time) => {
 
@@ -45,7 +54,6 @@ function Download(){
     const downloadFile = async (url,fileName) => {
 
       const fileDetailUrl = `${process.env.REACT_APP_FILE_DETAIL}?ID=${fileName}&pass=${passwordValue}`;
-      console.log(fileDetailUrl);
       const response = await fetch(fileDetailUrl);
 
       if(response.status===200){
