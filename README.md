@@ -1,6 +1,9 @@
 # File Sharing    
     
 "File sharing" is a web app which let you share files via internet. In this we are using aws-s3 to store the files and mongodb to store data like file details, login user details/credentials etc. Files are download via fetch api and downloaded with XMLHttpRequest in small chunks/streams with the ability to trach download and upload progress.
+Implemented features such as secure file upload/download with unique IDs, flexible sharing options (password protection,
+download limit, file expiry time and public/private sharing), user-friendly file management, secure registration with
+email OTP and login, and upload/download progress tracking.
        
 Frontend: Reactjs, HTML, CSS    
 Backend: Nodejs, Expressjs    
