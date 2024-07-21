@@ -3,14 +3,17 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const otp = require('../models/otp');
 const users = require('../models/users');
+const bcrypt = require('bcrypt');
 require("dotenv").config();
 
 router.post("/",multer().none(), async (req,res) => {
     const {mail,password,otpValue} = req.body;
     const sentOtp = await otp.findOne({email: mail});
+    const saltRounds = 10;
     try{
       if(sentOtp!==null && !isNaN(otpValue) && sentOtp.otp===parseInt(otpValue) && password.length!=0){
-        await users.findOneAndUpdate({email: mail},{email: mail,password: password},{upsert: true});
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+        await users.findOneAndUpdate({email: mail},{email: mail,password: hashedPassword},{upsert: true});
         console.log("User created/password reseted successfully");
   
         // jwt token parameters

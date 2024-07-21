@@ -2,15 +2,17 @@ var router = require('express').Router();
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const users = require('../models/users');
+const bcrypt = require('bcrypt');
 require("dotenv").config();
 
 router.post("/",multer().none(), async (req,res) => {
     const {mail, password} = req.body;
     try{
       const user = await users.findOne({email: mail});
+      const match = await bcrypt.compare(password, user.password);
       if(user===null){
         res.status(404).send("User not found");
-      }else if(password!==user.password){
+      }else if(!match){
         res.status(401).send("Incorrect Password"); 
       }else{
   
