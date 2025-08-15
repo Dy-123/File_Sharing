@@ -10,7 +10,7 @@ Backend: Nodejs, Expressjs
 Database: Mongodb, aws-s3   
 
 ### Docker Image
-Refer ![DOCKER.md][https://github.com/Dy-123/File_Sharing/blob/master/DOCKER.md]
+Refer ![DOCKER.md](https://github.com/Dy-123/File_Sharing/blob/master/DOCKER.md)
 
 ### GIF's and Screenshot    
 **Wait for a few moments to load the GIF's.**
