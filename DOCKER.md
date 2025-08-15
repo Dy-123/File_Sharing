@@ -28,7 +28,7 @@ docker-compose up --build
   docker exec -it file_sharing-localstack-1 awslocal s3 ls
   ```
 
-Note: All sent OTP can be viewed at MailHog WebUI.
+Note: All sent OTP can be viewed in MailHog WebUI.
 
 ---
 
