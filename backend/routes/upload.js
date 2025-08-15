@@ -10,7 +10,7 @@ require("dotenv").config();
 const upload = multer({
     storage: multerS3({
       s3: s3,
-      bucket: 'file-sharing-files',
+      bucket: process.env.AWS_BUCKET_NAME,
       // // can use aws s3 lifecycle leverage to automatically 
       // // delete file on time expiry: haven't setup in this, 
       // // in this manually delete when needed

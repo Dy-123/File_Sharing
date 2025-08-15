@@ -5,7 +5,10 @@ MONGO_CONN_URL=
 ##### Mongodb connection URL looks like: mongodb+srv://<user>:<password>@cluster0.iccwaxz.mongodb.net/?retryWrites=true&w=majority
 ------------------------------------------------------------------------------------------------------------------------------------
 MAIL_ID=     
-MAIL_PASS=     
+MAIL_PASS=
+MAIL_HOST=
+MAIL_PORT=
+MAIL_SECURE=
           
 ##### Above two details is the id and pass of the email id from which otp will be send to users.
 -------------------------------------------------------------------------------------------------------------------------------------     
@@ -18,7 +21,8 @@ PORT_NO=
      
 -------------------------------------------------------------------------------------------
 AWS_ACCESS_KEY=       
-AWS_SECRET_ACCESS_KEY=          
+AWS_SECRET_ACCESS_KEY=
+AWS_BUCKET_NAME=          
         
 ##### aws credentials which will be used to access aws-s3
 -------------------------------------------------------------------------------------------

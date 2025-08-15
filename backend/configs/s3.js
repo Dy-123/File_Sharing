@@ -5,7 +5,10 @@ const s3 = new S3Client({
       accessKeyId: process.env.AWS_ACCESS_KEY,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     },
-    region: 'ap-south-1',
+    region: process.env.AWS_REGION || 'ap-south-1',
+    // Useful for LocalStack
+    endpoint: process.env.S3_ENDPOINT,
+    forcePathStyle: !!process.env.S3_ENDPOINT
 });
 
 module.exports = s3;
